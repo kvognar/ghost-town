@@ -2,6 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 t=0
+speaking=true
 
 dialog = {
  message="",
@@ -17,8 +18,7 @@ dialog = {
 function dialog:draw()
  rectfill(self.x,self.y,self.x+self.w,self.y+self.h,2)
  rect(self.x,self.y,self.x+self.w,self.y+self.h,14)
- print(sub(self.message,0,self.index),
-       7,97,7)
+ print(sub(self.message,0,self.index),7,97,7)
  if self.wait and t%30 < 15 then
   circfill(self.x+self.w,self.y+self.h,1,7)
  end
@@ -39,10 +39,12 @@ end
 
 function dialog:advance()
  self.phrase_index+=1
- if #self.phrases <= self.phrase_index then
+ if self.phrase_index <= #self.phrases then
   self.message=self.phrases[self.phrase_index]
   self.index=0
   self.line_index=0
+ else
+  speaking=false
  end
 end
 
@@ -67,20 +69,58 @@ function dialog:next_word()
  return n-1
 end
 
+entity = {x=0,y=0,dx=0,dy=0,damping=1,w=5,h=8,spr_w=1,spr_h=1,frames={},frame_index=1,frametime=1,facing_left=false}
+
+function entity:new(attrs)
+  attrs = attrs or {}
+  attrs._super = self
+  return setmetatable(attrs,{__index=self})
+end
+
+function entity:draw()
+  if #self.frames > 0 then
+    spr(self.frames[self.frame_index],self.x,self.y,self.spr_w,self.spr_h,self.facing_left)
+  else
+    circfill(self.x,self.y,self.w/2)
+  end
+end
+
+entity.update = function(self)
+  self.x+=self.dx
+  self.y+=self.dy
+  self.dx*=self.damping
+  self.dy*=self.damping
+end
+
+player = entity:new({jumping=false,grounded=true,damping=.6,frames={22},})
+
+function player:update()
+  entity.update(self)
+  if btn(0) then
+    self.dx=-2
+  elseif btn(1) then
+    self.dx=2
+  end
+end
+
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
+ pl = player:new({x=64,y=64})
 end
 
 function _update()
- dialog:update()
+ if (speaking) dialog:update()
+ pl:update()
  t+=1
 end
 function _draw()
  cls()
- dialog:draw(dialog)
+ pl:draw()
+ if (speaking) dialog:draw(dialog)
 end
 
 -- let's make something appear under the dialog box sometime
+-- "good morning. the day is still young yet, and there are adventures to be had.",
 __gfx__
 00000000000000000e0000e0000000000044440000444400000000000000000000000000000000000000000000aaa0000000000000000000ffffffff00000000
 002222000022220000eeee00007777000043f3000043f3000000000000000000000000000007000000a5a0000aa4aa000000000000000000f4fff4ff00000000
@@ -247,7 +287,7 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
-000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001400001e47021470244702747027470263702637027370273702737027370273702737027370274702747027470274702747027470274702747027470263702537025370164701a4701d4701e4701d4701d470
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -1,0 +1,35 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+message	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ message="",$/;"	variable	line:8
+phrases	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ phrases={"good morning. the day is still young yet, and there are adventures to be had.","what should we do today?"},$/;"	variable	line:9
+phrase_index	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ phrase_index=1,$/;"	variable	line:10
+index	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ index=0,$/;"	variable	line:11
+line_index	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ line_index=1,$/;"	variable	line:12
+x	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ x=5,$/;"	variable	line:13
+y	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ y=95,$/;"	variable	line:14
+w	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ w=118,$/;"	variable	line:15
+h	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ h=20,$/;"	variable	line:16
+draw	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function dialog:draw()$/;"	function	line:18
+update	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function dialog:update()$/;"	function	line:27
+advance	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function dialog:advance()$/;"	function	line:40
+speaking	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^  speaking=false$/;"	variable	line:47
+insert_newlines	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function dialog:insert_newlines()$/;"	function	line:51
+next_word	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function dialog:next_word()$/;"	function	line:60
+n	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ local n=self.index+1$/;"	variable	line:61
+new	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function entity:new(attrs)$/;"	function	line:74
+attrs	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^  attrs = attrs or {}$/;"	variable	line:75
+draw	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function entity:draw()$/;"	function	line:80
+update	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function player:update()$/;"	function	line:97
+load_map	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function load_map()$/;"	function	line:114
+stage	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^  stage = {}$/;"	variable	line:115
+x	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^  for x=0,15 do$/;"	variable	line:116
+y	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^    for y=0,15 do$/;"	variable	line:117
+draw_map	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function draw_map()$/;"	function	line:123
+_init	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function _init()$/;"	function	line:128
+pl	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^ pl = player:new({x=64,y=64})$/;"	variable	line:130
+_update	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function _update()$/;"	function	line:133
+_draw	/Users/som/Library/Application Support/pico-8/carts/projects/ghost-town/ghost_town.p8	/^function _draw()$/;"	function	line:139

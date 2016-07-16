@@ -115,6 +115,8 @@ player = entity:new({
   frames={
     standing={0},
     walking={0,1,0,2},
+    upjump={103},
+    downjump={104},
   },
 })
 
@@ -181,6 +183,13 @@ function player:select_frames()
     self.current_frames=self.frames.walking
   else
     self.current_frames=self.frames.standing
+  end
+  if self.jumping then
+    if self.dy <0 then
+      self.current_frames=self.frames.upjump
+    else
+      self.current_frames=self.frames.downjump
+    end
   end
 
   if (self.dx < 0) self.facing_left=true
@@ -572,4 +581,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

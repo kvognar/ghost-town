@@ -4,6 +4,17 @@ __lua__
 t=0
 speaking=false
 
+b={
+  left=0,
+  right=1,
+  up=2,
+  down=3,
+  z=4,
+  x=5,
+}
+
+actors = {}
+
 dialog = {
  message="",
  phrases={"good morning. the day is still young yet, and there are adventures to be had.","what should we do today?"},
@@ -110,9 +121,9 @@ player = entity:new({
 function player:update()
   self.dx*=self.damping
   self.dy+=self.gravity
-  if btn(0) then
+  if btn(b.left) then
     self.dx=-1
-  elseif btn(1) then
+  elseif btn(b.right) then
     self.dx=1
   else
     self.dx=0
@@ -149,7 +160,7 @@ function player:update()
 
   self.y+=self.dy
 
-  if btn(4) and not self.jumping then
+  if btn(b.z) and not self.jumping then
     self.jumping=true
     self.dy=-2
   end

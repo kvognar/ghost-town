@@ -106,7 +106,7 @@ end
 player = entity:new({
   jumping=false,
   grounded=true,
-  damping=.6,
+  damping=1,
   gravity=.2,
   spr_w=1,
   spr_h=1.5,
@@ -119,20 +119,14 @@ player = entity:new({
 })
 
 function player:update()
+  self:process_buttons()
+  self:collide_and_move()
+  self:select_frames()
+end
+
+function player:collide_and_move()
   self.dx*=self.damping
   self.dy+=self.gravity
-  if btn(b.left) then
-    self.dx=-1
-  elseif btn(b.right) then
-    self.dx=1
-  else
-    self.dx=0
-  end
-
-  -- colliding = self:collides_with_map()
-  -- if (colliding) self.dx=0 self.dy = 0
-  local checkx = ((self.x + 4))
-  local checky = ((self.y + self.h + self.dy))
 
   --collide left
   if is_solid(self.x+self.dx,self.y+self.h) or
@@ -147,7 +141,6 @@ function player:update()
   then
     self.dx=0
   end
-
   self.x+=self.dx
 
   -- collide down
@@ -157,14 +150,33 @@ function player:update()
     self.jumping=false
     self.dy=0
   end
-
   self.y+=self.dy
 
-  if btn(b.z) and not self.jumping then
+end
+
+function player:process_buttons()
+  if btn(b.left) then
+    self.dx=-1
+  elseif btn(b.right) then
+    self.dx=1
+  else
+    self.dx=0
+  end
+
+  if btn(b.up) and not self.jumping then
     self.jumping=true
     self.dy=-2
   end
 
+  local other = colliding_actor()
+  if other and btnp(b.z) then
+    other:interact()
+  end
+
+
+end
+
+function player:select_frames()
   if abs(self.dx) > 0 then
     self.current_frames=self.frames.walking
   else
@@ -177,16 +189,17 @@ function player:update()
   if t%8==0 then
     self.frame_index = (self.frame_index%#self.current_frames)+1
   end
-
 end
 
 ghost = entity:new({
-  phrases={"Hey, you look familiar.", "I think I'd like to be as tall as you someday."},
-  current_frames={114,115,116,117,118,117,116,115}
+  phrases={"hEY, YOU LOOK FAMILIAR.", "i THINK I'D LIKE TO BE AS TALL AS YOU SOMEDAY."},
+  current_frames={123,124,125,126,127,126,125,124}
 })
 
-function ghost:speak()
+function ghost:interact()
   dialog.phrases=self.phrases
+  dialog.phrase_index=0
+  dialog:advance()
   speaking=true
 end
 
@@ -200,6 +213,23 @@ function is_solid(x,y)
   return fget(get_tile(x,y)) == 1
 end
 
+function colliding_actor()
+  for a in all(actors) do
+    if pl.x+pl.w > a.x and
+       a.x+a.w > pl.x and
+       pl.y+pl.h > a.y and
+       a.y+a.h > pl.y
+    then
+      return a
+    end
+  end
+end
+
+function add_actor(actor_class, options)
+  local actor = actor_class:new(options)
+  add(actors, actor)
+  actor:init()
+end
 
 function load_map()
   stage = {}
@@ -227,8 +257,8 @@ function _init()
 end
 
 function _update()
+ if (not speaking) pl:update()
  if (speaking) dialog:update()
- pl:update()
  foreach(actors, function(actor)
    actor:update()
  end)
@@ -542,3 +572,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+

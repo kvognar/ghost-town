@@ -96,9 +96,11 @@ player = entity:new({
   jumping=false,
   grounded=true,
   damping=.6,
-  gravity=0,
+  gravity=.2,
   spr_w=1,
   spr_h=1.5,
+  h=11,
+  w=6,
   frames={
     standing={0},
     walking={0,1,0,2},
@@ -106,8 +108,6 @@ player = entity:new({
 })
 
 function player:update()
-  self.x+=self.dx
-  self.y+=self.dy
   self.dx*=self.damping
   self.dy+=self.gravity
   if btn(0) then
@@ -117,7 +117,38 @@ function player:update()
   else
     self.dx=0
   end
-  
+
+  -- colliding = self:collides_with_map()
+  -- if (colliding) self.dx=0 self.dy = 0
+  local checkx = ((self.x + 4))
+  local checky = ((self.y + self.h + self.dy))
+
+  --collide left
+  if is_solid(self.x+self.dx,self.y+self.h) or
+     is_solid(self.x+self.dx,self.y)
+  then
+    self.dx=0
+  end
+
+  --collide right
+  if is_solid(self.x+self.dx+self.w,self.y+self.h) or
+     is_solid(self.x+self.dx+self.w,self.y)
+  then
+    self.dx=0
+  end
+
+  self.x+=self.dx
+
+  -- collide down
+  if is_solid(self.x,self.y+self.h+self.dy) or
+     is_solid(self.x+self.w,self.y+self.h+self.dy)
+  then
+    self.jumping=false
+    self.dy=0
+  end
+
+  self.y+=self.dy
+
   if btn(4) and not self.jumping then
     self.jumping=true
     self.dy=-2
@@ -138,6 +169,10 @@ function player:update()
 
 end
 
+function is_solid(x,y)
+  return fget(get_tile(x,y)) == 1
+end
+
 
 function load_map()
   stage = {}
@@ -151,6 +186,10 @@ end
 function draw_map()
   rectfill(0,0,127,127,12)
   map(0,0,0,0,16,16)
+end
+
+function get_tile(x,y)
+  return mget(flr(x/8),flr(y/8))
 end
 
 function _init()
@@ -168,7 +207,6 @@ end
 function _draw()
  cls()
  draw_map()
- print('hey')
  pl:draw()
  if (speaking) dialog:draw(dialog)
 end

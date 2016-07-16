@@ -180,6 +180,22 @@ function player:update()
 
 end
 
+ghost = entity:new({
+  phrases={"Hey, you look familiar.", "I think I'd like to be as tall as you someday."},
+  current_frames={114,115,116,117,118,117,116,115}
+})
+
+function ghost:speak()
+  dialog.phrases=self.phrases
+  speaking=true
+end
+
+function ghost:update()
+  if t%8==0 then
+    self.frame_index = (self.frame_index%#self.current_frames)+1
+  end
+end
+
 function is_solid(x,y)
   return fget(get_tile(x,y)) == 1
 end
@@ -206,18 +222,25 @@ end
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
  pl = player:new({x=64,y=64})
+ add(actors, ghost:new({x=30,y=70}))
  printh(#pl.frames)
 end
 
 function _update()
  if (speaking) dialog:update()
  pl:update()
+ foreach(actors, function(actor)
+   actor:update()
+ end)
  t+=1
 end
 
 function _draw()
  cls()
  draw_map()
+ foreach(actors, function(actor)
+   actor:draw()
+ end)
  pl:draw()
  if (speaking) dialog:draw(dialog)
 end
@@ -519,4 +542,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

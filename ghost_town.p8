@@ -15,6 +15,61 @@ b={
 
 actors = {}
 
+stage = {tile_sx=0,tile_sy=0,tile_ex=16,tile_ey=12,width=128,}
+
+function stage:new(attrs)
+  attrs=attrs or {}
+  attrs._super = self
+  return setmetatable(attrs,{__index=self})
+end
+
+function stage:load()
+  actors={}
+end
+
+function stage:update() end
+
+function stage.draw(self)
+  map(self.tile_sx,self.tile_sy,0,0,self.tile_ex,self.tile_ey)
+end
+
+starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,tile_h=12})
+function starting_area:draw()
+  rectfill(0,0,127,127,12)
+  stage.draw(self)
+end
+function starting_area:exit_right()
+  current_stage=schoolhouse_entrance
+  pl.x=0
+end
+
+schoolhouse_entrance=stage:new({tile_sx=16,tile_sy=0,tile_w=16,tile_h=12})
+function schoolhouse_entrance:draw()
+  rectfill(0,0,127,127,12)
+  stage.draw(self)
+end
+function schoolhouse_entrance:exit_left()
+  current_stage=starting_area
+  pl.x=125
+end
+function schoolhouse_entrance:exit_right()
+  current_stage=suburbs_1
+  pl.x=0
+end
+
+suburbs_1=stage:new({tile_sx=32,tile_sy=0,tile_w=32,tile_h=12})
+function suburbs_1:draw()
+  rectfill(0,0,127,127,12)
+  stage.draw(self)
+end
+function suburbs_1:exit_left()
+  current_stage=schoolhouse_entrance
+  pl.x=125
+end
+
+
+
+
 dialog = {
  message="",
  phrases={"good morning. the day is still young yet, and there are adventures to be had.","what should we do today?"},
@@ -124,6 +179,7 @@ function player:update()
   self:process_buttons()
   self:collide_and_move()
   self:select_frames()
+  self:check_boundaries()
 end
 
 function player:collide_and_move()
@@ -175,7 +231,6 @@ function player:process_buttons()
     other:interact()
   end
 
-
 end
 
 function player:select_frames()
@@ -197,6 +252,15 @@ function player:select_frames()
 
   if t%8==0 then
     self.frame_index = (self.frame_index%#self.current_frames)+1
+  end
+end
+
+function player:check_boundaries()
+  if self.x > current_stage.width and current_stage.exit_right then
+    self.x=0
+    current_stage:exit_right()
+  elseif self.x < -5 and current_stage.exit_left then
+    current_stage:exit_left()
   end
 end
 
@@ -241,32 +305,19 @@ function add_actor(actor_class, options)
   actor:init()
 end
 
-function load_map()
-  stage = {}
-  for x=0,15 do
-    for y=0,15 do
-      -- if fget()
-    end
-  end
-end
-
-function draw_map()
-  rectfill(0,0,127,127,12)
-  map(0,0,0,0,16,16)
-end
-
 function get_tile(x,y)
   return mget(flr(x/8),flr(y/8))
 end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
+ current_stage=suburbs_1
  add(actors, ghost:new({x=30,y=70}))
  pl = player:new({x=64,y=68})
- printh(#pl.frames)
 end
 
 function _update()
+ current_stage:update()
  if (not speaking) pl:update()
  if (speaking) dialog:update()
  foreach(actors, function(actor)
@@ -277,7 +328,7 @@ end
 
 function _draw()
  cls()
- draw_map()
+ current_stage:draw()
  foreach(actors, function(actor)
    actor:draw()
  end)

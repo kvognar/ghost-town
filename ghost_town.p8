@@ -12,6 +12,7 @@ b={
   z=4,
   x=5,
 }
+cam={x=0,y=0}
 
 actors = {}
 
@@ -30,12 +31,23 @@ end
 function stage:update() end
 
 function stage.draw(self)
+  local camera_window=56
+  if pl.x>cam.x+128-camera_window then
+    cam.x+=pl.x-(cam.x+128-camera_window)
+  end
+  if pl.x<cam.x+camera_window then
+    cam.x-=cam.x+camera_window-pl.x
+  end
+  cam.x=max(cam.x,0)
+  cam.x=min(cam.x,self.width-128)
+  camera(cam.x,cam.y)
+
   map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
 end
 
 starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,tile_h=16})
 function starting_area:draw()
-  rectfill(0,0,127,127,12)
+  rectfill(0,0,128,128,12)
   stage.draw(self)
 end
 function starting_area:exit_right()
@@ -45,7 +57,7 @@ end
 
 schoolhouse_entrance=stage:new({tile_sx=16,tile_sy=0,tile_w=16,tile_h=16})
 function schoolhouse_entrance:draw()
-  rectfill(0,0,127,127,12)
+  rectfill(0,0,128,128,12)
   stage.draw(self)
 end
 function schoolhouse_entrance:exit_left()
@@ -57,17 +69,19 @@ function schoolhouse_entrance:exit_right()
   pl.x=0
 end
 
-suburbs_1=stage:new({tile_sx=32,tile_sy=0,tile_w=32,tile_h=16})
+suburbs_1=stage:new({tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8})
 function suburbs_1:draw()
-  rectfill(0,0,127,127,12)
+  rectfill(0,0,self.width,128,12)
   stage.draw(self)
 end
 function suburbs_1:exit_left()
   current_stage=schoolhouse_entrance
   pl.x=125
 end
-
-
+function suburbs_1:exit_right()
+  current_stage=starting_area
+  pl.x=0
+end
 
 
 dialog = {

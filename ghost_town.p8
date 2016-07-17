@@ -30,10 +30,10 @@ end
 function stage:update() end
 
 function stage.draw(self)
-  map(self.tile_sx,self.tile_sy,0,0,self.tile_ex,self.tile_ey)
+  map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
 end
 
-starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,tile_h=12})
+starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,tile_h=16})
 function starting_area:draw()
   rectfill(0,0,127,127,12)
   stage.draw(self)
@@ -43,7 +43,7 @@ function starting_area:exit_right()
   pl.x=0
 end
 
-schoolhouse_entrance=stage:new({tile_sx=16,tile_sy=0,tile_w=16,tile_h=12})
+schoolhouse_entrance=stage:new({tile_sx=16,tile_sy=0,tile_w=16,tile_h=16})
 function schoolhouse_entrance:draw()
   rectfill(0,0,127,127,12)
   stage.draw(self)
@@ -57,7 +57,7 @@ function schoolhouse_entrance:exit_right()
   pl.x=0
 end
 
-suburbs_1=stage:new({tile_sx=32,tile_sy=0,tile_w=32,tile_h=12})
+suburbs_1=stage:new({tile_sx=32,tile_sy=0,tile_w=32,tile_h=16})
 function suburbs_1:draw()
   rectfill(0,0,127,127,12)
   stage.draw(self)
@@ -170,8 +170,8 @@ player = entity:new({
   frames={
     standing={0},
     walking={0,1,0,2},
-    upjump={103},
-    downjump={104},
+    upjump={3},
+    downjump={4},
   },
 })
 
@@ -311,7 +311,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=suburbs_1
+ current_stage=starting_area
  add(actors, ghost:new({x=30,y=70}))
  pl = player:new({x=64,y=68})
 end
@@ -633,4 +633,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

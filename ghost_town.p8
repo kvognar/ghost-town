@@ -202,7 +202,8 @@ end
 
 ghost = entity:new({
   phrases={"hEY, YOU LOOK FAMILIAR.", "i THINK I'D LIKE TO BE AS TALL AS YOU SOMEDAY."},
-  current_frames={123,124,125,126,127,126,125,124}
+  current_frames={123,124,125,126,127,126,125,124},
+  w=12,
 })
 
 function ghost:interact()

@@ -31,6 +31,10 @@ end
 function stage:update() end
 
 function stage.draw(self)
+  map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
+end
+
+function set_camera()
   local camera_window=56
   if pl.x>cam.x+128-camera_window then
     cam.x+=pl.x-(cam.x+128-camera_window)
@@ -39,10 +43,8 @@ function stage.draw(self)
     cam.x-=cam.x+camera_window-pl.x
   end
   cam.x=max(cam.x,0)
-  cam.x=min(cam.x,self.width-128)
+  cam.x=min(cam.x,current_stage.width-128)
   camera(cam.x,cam.y)
-
-  map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
 end
 
 starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,tile_h=16})
@@ -65,23 +67,39 @@ function schoolhouse_entrance:exit_left()
   pl.x=125
 end
 function schoolhouse_entrance:exit_right()
-  current_stage=suburbs_1
+  current_stage=blueberry_lane
   pl.x=0
 end
 
-suburbs_1=stage:new({tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8})
-function suburbs_1:draw()
+blueberry_lane=stage:new({tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8})
+function blueberry_lane:draw()
   rectfill(0,0,self.width,128,12)
   stage.draw(self)
 end
-function suburbs_1:exit_left()
+function blueberry_lane:exit_left()
   current_stage=schoolhouse_entrance
   pl.x=125
 end
-function suburbs_1:exit_right()
+function blueberry_lane:exit_right()
+  current_stage=fountain
+  pl.x=0
+end
+
+fountain=stage:new({tile_sx=65,tile_sy=0,tile_w=16,tile_h=16,width=16*8})
+function fountain:draw()
+  rectfill(0,0,self.width,128,12)
+  stage.draw(self)
+end
+
+function fountain:exit_left()
+  current_stage=blueberry_lane
+  pl.x=blueberry_lane.width
+end
+function fountain:exit_right()
   current_stage=starting_area
   pl.x=0
 end
+
 
 
 dialog = {
@@ -96,6 +114,7 @@ dialog = {
  h=20,
 }
 function dialog:draw()
+ camera()
  rectfill(self.x,self.y,self.x+self.w,self.y+self.h,2)
  rect(self.x,self.y,self.x+self.w,self.y+self.h,14)
  print(sub(self.message,0,self.index),7,97,7)
@@ -325,8 +344,8 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=starting_area
- add(actors, ghost:new({x=30,y=70}))
+ current_stage=blueberry_lane
+ add(actors, ghost:new({x=64,y=70}))
  pl = player:new({x=64,y=68})
 end
 
@@ -342,6 +361,7 @@ end
 
 function _draw()
  cls()
+ set_camera()
  current_stage:draw()
  foreach(actors, function(actor)
    actor:draw()

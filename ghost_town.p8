@@ -17,8 +17,9 @@ cam={x=0,y=0}
 
 actors = {}
 
-stage = {tile_sx=0,tile_sy=0,tile_ex=16,tile_ey=12,width=128,height=128}
+stage = {tile_sx=0,tile_sy=0,width=128,height=128,actors={},palette_swaps={}}
 
+swap_tiles={30,63}
 function stage:new(attrs)
   attrs=attrs or {}
   attrs._super = self
@@ -33,7 +34,18 @@ function stage:update() end
 
 function stage:draw()
   self:draw_sky()
-  map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
+  for x=self.tile_sx,self.tile_sx+self.tile_w do
+    for y=self.tile_sy,self.tile_sy+self.tile_h do
+      -- do palette swap only for overloaded tiles
+      if mget(x,y) > swap_tiles[1] and mget(x,y) < swap_tiles[2] then
+        for set in all (self.palette_swaps) do
+          pal(set[1],set[2])
+        end
+      end
+      map(x,y,(x-self.tile_sx)*8,(y-self.tile_sy)*8,1,1)
+      pal()
+    end
+  end
 end
 
 function stage:draw_sky()
@@ -76,7 +88,14 @@ function starting_area:exit_right()
   pl.x=0
 end
 
-schoolhouse_entrance=stage:new({tile_sx=16,tile_sy=0,tile_w=16,tile_h=16})
+schoolhouse_entrance=stage:new({
+  tile_sx=16,tile_sy=0,tile_w=16,tile_h=16,
+  palette_swaps={
+    {14,2},
+    {3,8},
+    {12,8}
+  }
+})
 function schoolhouse_entrance:exit_left()
   current_stage=starting_area
   pl.x=125
@@ -86,7 +105,14 @@ function schoolhouse_entrance:exit_right()
   pl.x=0
 end
 
-blueberry_lane=stage:new({tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8})
+blueberry_lane=stage:new({
+  tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8,
+  palette_swaps={
+    {14,1},
+    {3,1},
+    {12,2}
+  }
+})
 function blueberry_lane:exit_left()
   current_stage=schoolhouse_entrance
   pl.x=125
@@ -115,7 +141,7 @@ prison=room:new({tile_sx=19,tile_sy=21,tile_w=7,tile_h=5,width=7*8,height=5*8})
 
 dialog = {
  message="",
- phrases={"good morning. the day is still young yet, and there are adventures to be had.","what should we do today?"},
+ phrases={},
  phrase_index=1,
  index=0,
  line_index=1,
@@ -151,7 +177,7 @@ function dialog:update()
   self:insert_newlines()
  else
   self.wait=true
-  if btn(4) then
+  if btnp(b.x) then
    self.wait=false
    self:advance()
   end
@@ -290,7 +316,7 @@ function player:process_buttons()
   end
 
   local other = colliding_actor()
-  if other and btnp(b.z) then
+  if other and btnp(b.x) then
     other:interact()
   end
 
@@ -328,7 +354,7 @@ function player:check_boundaries()
 end
 
 ghost = entity:new({
-  phrases={"hey, you look familiar.", "i think i'd like to be as tall as you someday."},
+  phrases={},
   current_frames={123,124,125,126,127,126,125,124},
   w=12,
 })
@@ -343,12 +369,54 @@ function ghost:update()
   end
 end
 
+-- define npcs
+
+little_ghost=ghost:new({
+  phrases={"hey, you look familiar.", "i think i'd like to be as tall as you someday."},
+  current_frames={123,124,125,126,127,126,125,124},
+  x=64,
+  y=70,
+  name="little ghost"
+})
+
+sugar_captain=ghost:new({
+  phrases={"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like eucalyptus sap and honeydew!"},
+  current_frames={78},
+  x=50,
+  y=70,
+  name="sugar captain",
+})
+
+sugar_maestro=ghost:new({
+  phrases={"shh, i'm in torpor.", "that's like a nap, but way nappier."},
+  current_frames={77},
+  x=20,
+  y=70,
+  name="sugar maestro"
+})
+
+stargazer=ghost:new({
+  phrases={"i always wondered why ghosts were supposed to haunt places.",
+"why stick around in some dusty old ruin?",
+"you don't get hungry, you don't get tired, you can't get hurt. and you can fly!",
+"go explore! there's a hundred billion lifetimes of things to see on this planet alone.",
+"and why not explore the stars? gravity is nothing to a ghost.",
+"thousands of years of interstellar travel is nothing if you're immortal.",
+"just be patient, and one day you'll find another world to explore.",
+". . .",
+"i say that, and yet i'm stuck here.",},
+current_frames={79},
+x=20,
+y=70,
+name="stargazer"
+})
+
 function is_solid(x,y)
   return fget(get_tile(x,y)) == 1
 end
 
 function colliding_actor()
-  for a in all(actors) do
+  for a in all(current_stage.actors) do
     if pl.x+pl.w > a.x and
        a.x+a.w > pl.x and
        pl.y+pl.h > a.y and
@@ -376,11 +444,26 @@ function get_tile(x,y)
   return mget(flr(x/8)+current_stage.tile_sx,flr(y/8)+current_stage.tile_sy)
 end
 
+function initialize_actors()
+  starting_area.actors={
+    little_ghost,
+  }
+  schoolhouse_entrance.actors={
+    sugar_captain,
+    sugar_maestro,
+  }
+  blueberry_lane.actors={
+    door:new({x=20,y=70,room=prison}),
+  }
+  fountain.actors={
+    stargazer,
+  }
+end
+
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
  current_stage=blueberry_lane
- add(actors, ghost:new({x=64,y=70,name="little ghost"}))
- add(actors, door:new({x=20,y=70,room=prison}))
+ initialize_actors()
  pl = player:new({x=30,y=20})
 end
 
@@ -388,7 +471,7 @@ function _update()
  current_stage:update()
  if (not speaking) pl:update()
  if (speaking) dialog:update()
- foreach(actors, function(actor)
+ foreach(current_stage.actors, function(actor)
    actor:update()
  end)
  t+=1
@@ -398,7 +481,7 @@ function _draw()
  cls()
  set_camera()
  current_stage:draw()
- foreach(actors, function(actor)
+ foreach(current_stage.actors, function(actor)
    actor:draw()
  end)
  pl:draw()
@@ -702,4 +785,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

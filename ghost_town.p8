@@ -395,6 +395,22 @@ sugar_maestro=ghost:new({
   name="sugar maestro"
 })
 
+stargazer=ghost:new({
+  phrases={"i always wondered why ghosts were supposed to haunt places.",
+"why stick around in some dusty old ruin?",
+"you don't get hungry, you don't get tired, you can't get hurt. and you can fly!",
+"go explore! there's a hundred billion lifetimes of things to see on this planet alone.",
+"and why not explore the stars? gravity is nothing to a ghost.",
+"thousands of years of interstellar travel is nothing if you're immortal.",
+"just be patient, and one day you'll find another world to explore.",
+". . .",
+"i say that, and yet i'm stuck here.",},
+current_frames={79},
+x=20,
+y=70,
+name="stargazer"
+})
+
 function is_solid(x,y)
   return fget(get_tile(x,y)) == 1
 end
@@ -438,6 +454,9 @@ function initialize_actors()
   }
   blueberry_lane.actors={
     door:new({x=20,y=70,room=prison}),
+  }
+  fountain.actors={
+    stargazer,
   }
 end
 

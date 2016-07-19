@@ -17,7 +17,7 @@ cam={x=0,y=0}
 
 actors = {}
 
-stage = {tile_sx=0,tile_sy=0,tile_ex=16,tile_ey=12,width=128,height=128}
+stage = {tile_sx=0,tile_sy=0,tile_ex=16,tile_ey=12,width=128,height=128,actors={}}
 
 function stage:new(attrs)
   attrs=attrs or {}
@@ -328,7 +328,7 @@ function player:check_boundaries()
 end
 
 ghost = entity:new({
-  phrases={"hey, you look familiar.", "i think i'd like to be as tall as you someday."},
+  phrases={},
   current_frames={123,124,125,126,127,126,125,124},
   w=12,
 })
@@ -343,12 +343,38 @@ function ghost:update()
   end
 end
 
+-- define npcs
+
+little_ghost=ghost:new({
+  phrases={"hey, you look familiar.", "i think i'd like to be as tall as you someday."},
+  current_frames={123,124,125,126,127,126,125,124},
+  x=64,
+  y=70,
+  name="little ghost"
+})
+
+sugar_captain=ghost:new({
+  phrases={"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like ecualyptus sap and honeydew!"},
+  current_frames={78},
+  x=50,
+  y=70,
+  name="sugar captain",
+})
+
+sugar_maestro=ghost:new({
+  phrases={"shh, i'm in torpor.", "that's like a nap, but way nappier."},
+  current_frames={77},
+  x=20,
+  y=70,
+  name="sugar maestro"
+})
+
 function is_solid(x,y)
   return fget(get_tile(x,y)) == 1
 end
 
 function colliding_actor()
-  for a in all(actors) do
+  for a in all(current_stage.actors) do
     if pl.x+pl.w > a.x and
        a.x+a.w > pl.x and
        pl.y+pl.h > a.y and
@@ -376,10 +402,20 @@ function get_tile(x,y)
   return mget(flr(x/8)+current_stage.tile_sx,flr(y/8)+current_stage.tile_sy)
 end
 
+function initialize_actors()
+  starting_area.actors={
+    little_ghost,
+  }
+  schoolhouse_entrance.actors={
+    sugar_captain,
+    sugar_maestro,
+  }
+end
+
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
  current_stage=blueberry_lane
- add(actors, ghost:new({x=64,y=70,name="little ghost"}))
+ initialize_actors()
  add(actors, door:new({x=20,y=70,room=prison}))
  pl = player:new({x=30,y=20})
 end
@@ -388,7 +424,7 @@ function _update()
  current_stage:update()
  if (not speaking) pl:update()
  if (speaking) dialog:update()
- foreach(actors, function(actor)
+ foreach(current_stage.actors, function(actor)
    actor:update()
  end)
  t+=1
@@ -398,7 +434,7 @@ function _draw()
  cls()
  set_camera()
  current_stage:draw()
- foreach(actors, function(actor)
+ foreach(current_stage.actors, function(actor)
    actor:draw()
  end)
  pl:draw()
@@ -702,4 +738,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

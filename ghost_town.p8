@@ -36,6 +36,7 @@ function stage:draw()
   self:draw_sky()
   for x=self.tile_sx,self.tile_sx+self.tile_w do
     for y=self.tile_sy,self.tile_sy+self.tile_h do
+      -- do palette swap only for overloaded tiles
       if mget(x,y) > swap_tiles[1] and mget(x,y) < swap_tiles[2] then
         for set in all (self.palette_swaps) do
           pal(set[1],set[2])
@@ -140,7 +141,7 @@ prison=room:new({tile_sx=19,tile_sy=21,tile_w=7,tile_h=5,width=7*8,height=5*8})
 
 dialog = {
  message="",
- phrases={"good morning. the day is still young yet, and there are adventures to be had.","what should we do today?"},
+ phrases={},
  phrase_index=1,
  index=0,
  line_index=1,
@@ -176,7 +177,7 @@ function dialog:update()
   self:insert_newlines()
  else
   self.wait=true
-  if btn(4) then
+  if btnp(b.x) then
    self.wait=false
    self:advance()
   end
@@ -315,7 +316,7 @@ function player:process_buttons()
   end
 
   local other = colliding_actor()
-  if other and btnp(b.z) then
+  if other and btnp(b.x) then
     other:interact()
   end
 
@@ -435,13 +436,15 @@ function initialize_actors()
     sugar_captain,
     sugar_maestro,
   }
+  blueberry_lane.actors={
+    door:new({x=20,y=70,room=prison}),
+  }
 end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
  current_stage=blueberry_lane
  initialize_actors()
- add(actors, door:new({x=20,y=70,room=prison}))
  pl = player:new({x=30,y=20})
 end
 

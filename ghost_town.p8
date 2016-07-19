@@ -2,6 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 t=0
+sunset=0
 speaking=false
 
 b={
@@ -30,8 +31,19 @@ end
 
 function stage:update() end
 
-function stage.draw(self)
+function stage:draw()
+  self:draw_sky()
   map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
+end
+
+function stage:draw_sky()
+  if (t%500==0) sunset+=1
+
+  rectfill(0,0,self.width,11+sunset/4,1)
+  rectfill(0,12+sunset/4,self.width,23+sunset/3,2)
+  rectfill(0,24+sunset/3,self.width,35+sunset/2,8)
+  rectfill(0,36+sunset/2,self.width,47+sunset,9)
+  rectfill(0,48+sunset,self.width,128,10)
 end
 
 function set_camera()
@@ -58,10 +70,6 @@ function starting_area:exit_right()
 end
 
 schoolhouse_entrance=stage:new({tile_sx=16,tile_sy=0,tile_w=16,tile_h=16})
-function schoolhouse_entrance:draw()
-  rectfill(0,0,128,128,12)
-  stage.draw(self)
-end
 function schoolhouse_entrance:exit_left()
   current_stage=starting_area
   pl.x=125
@@ -72,10 +80,6 @@ function schoolhouse_entrance:exit_right()
 end
 
 blueberry_lane=stage:new({tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8})
-function blueberry_lane:draw()
-  rectfill(0,0,self.width,128,12)
-  stage.draw(self)
-end
 function blueberry_lane:exit_left()
   current_stage=schoolhouse_entrance
   pl.x=125
@@ -86,11 +90,6 @@ function blueberry_lane:exit_right()
 end
 
 fountain=stage:new({tile_sx=65,tile_sy=0,tile_w=16,tile_h=16,width=16*8})
-function fountain:draw()
-  rectfill(0,0,self.width,128,12)
-  stage.draw(self)
-end
-
 function fountain:exit_left()
   current_stage=blueberry_lane
   pl.x=blueberry_lane.width

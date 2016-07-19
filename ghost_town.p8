@@ -17,8 +17,9 @@ cam={x=0,y=0}
 
 actors = {}
 
-stage = {tile_sx=0,tile_sy=0,tile_ex=16,tile_ey=12,width=128,height=128,actors={}}
+stage = {tile_sx=0,tile_sy=0,width=128,height=128,actors={},palette_swaps={}}
 
+swap_tiles={30,63}
 function stage:new(attrs)
   attrs=attrs or {}
   attrs._super = self
@@ -33,7 +34,17 @@ function stage:update() end
 
 function stage:draw()
   self:draw_sky()
-  map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
+  for x=self.tile_sx,self.tile_sx+self.tile_w do
+    for y=self.tile_sy,self.tile_sy+self.tile_h do
+      if mget(x,y) > swap_tiles[1] and mget(x,y) < swap_tiles[2] then
+        for set in all (self.palette_swaps) do
+          pal(set[1],set[2])
+        end
+      end
+      map(x,y,(x-self.tile_sx)*8,(y-self.tile_sy)*8,1,1)
+      pal()
+    end
+  end
 end
 
 function stage:draw_sky()
@@ -76,7 +87,14 @@ function starting_area:exit_right()
   pl.x=0
 end
 
-schoolhouse_entrance=stage:new({tile_sx=16,tile_sy=0,tile_w=16,tile_h=16})
+schoolhouse_entrance=stage:new({
+  tile_sx=16,tile_sy=0,tile_w=16,tile_h=16,
+  palette_swaps={
+    {14,2},
+    {3,8},
+    {12,8}
+  }
+})
 function schoolhouse_entrance:exit_left()
   current_stage=starting_area
   pl.x=125
@@ -86,7 +104,14 @@ function schoolhouse_entrance:exit_right()
   pl.x=0
 end
 
-blueberry_lane=stage:new({tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8})
+blueberry_lane=stage:new({
+  tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8,
+  palette_swaps={
+    {14,1},
+    {3,1},
+    {12,2}
+  }
+})
 function blueberry_lane:exit_left()
   current_stage=schoolhouse_entrance
   pl.x=125
@@ -354,7 +379,7 @@ little_ghost=ghost:new({
 })
 
 sugar_captain=ghost:new({
-  phrases={"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like ecualyptus sap and honeydew!"},
+  phrases={"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like eucalyptus sap and honeydew!"},
   current_frames={78},
   x=50,
   y=70,

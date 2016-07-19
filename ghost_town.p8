@@ -107,19 +107,28 @@ dialog = {
  phrase_index=1,
  index=0,
  line_index=1,
- x=5,
+ x=0,
  y=95,
- w=118,
- h=20,
+ w=127,
+ h=32,
 }
 function dialog:draw()
  camera()
- rectfill(self.x,self.y,self.x+self.w,self.y+self.h,2)
- rect(self.x,self.y,self.x+self.w,self.y+self.h,14)
- print(sub(self.message,0,self.index),7,97,7)
+ rectfill(self.x,self.y,self.x+self.w,self.y+self.h,0)
+ rect(self.x,self.y,self.x+self.w,self.y+self.h,5)
+ print(sub(self.message,0,self.index),self.x+4,self.y+3,7)
+ if (self.speaker) self:draw_speaker()
  if self.wait and t%30 < 15 then
-  circfill(self.x+self.w,self.y+self.h,1,7)
+  print("\151",self.x+self.w-10,self.y+self.h-7,7)
  end
+end
+
+function dialog:draw_speaker()
+  local width = #self.speaker.name*4+6
+  rectfill(self.x,self.y-8,width,self.y,0)
+  rect(self.x,self.y-8,width,self.y,5)
+  line(self.x+1,self.y,width-1,self.y,0)
+  print(self.speaker.name, self.x+4,self.y-5,13)
 end
 
 function dialog:update()
@@ -142,6 +151,7 @@ function dialog:advance()
   self.index=0
   self.line_index=0
  else
+   if (self.callback) self.callback()
   speaking=false
  end
 end
@@ -165,6 +175,15 @@ function dialog:next_word()
   end
  end
  return n-1
+end
+
+function dialog:init(phrases,speaker,callback)
+  self.phrases=phrases
+  self.speaker=speaker
+  self.callback=callback
+  self.phrase_index=0
+  self:advance()
+  speaking=true
 end
 
 entity = {x=0,y=0,dx=0,dy=0,damping=1,w=5,h=8,spr_w=1,spr_h=1,frames={},frame_index=1,frametime=1,facing_left=false}
@@ -297,16 +316,13 @@ function player:check_boundaries()
 end
 
 ghost = entity:new({
-  phrases={"hEY, YOU LOOK FAMILIAR.", "i THINK I'D LIKE TO BE AS TALL AS YOU SOMEDAY."},
+  phrases={"hey, you look familiar.", "i think i'd like to be as tall as you someday."},
   current_frames={123,124,125,126,127,126,125,124},
   w=12,
 })
 
 function ghost:interact()
-  dialog.phrases=self.phrases
-  dialog.phrase_index=0
-  dialog:advance()
-  speaking=true
+  dialog:init(self.phrases,self)
 end
 
 function ghost:update()
@@ -344,7 +360,7 @@ end
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
  current_stage=blueberry_lane
- add(actors, ghost:new({x=64,y=70}))
+ add(actors, ghost:new({x=64,y=70,name="little ghost"}))
  pl = player:new({x=64,y=68})
 end
 

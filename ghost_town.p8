@@ -19,7 +19,9 @@ actors = {}
 
 stage = {tile_sx=0,tile_sy=0,width=128,height=128,actors={},palette_swaps={}}
 
+-- overloaded tiles meant to be palette swapped
 swap_tiles={30,63}
+
 function stage:new(attrs)
   attrs=attrs or {}
   attrs._super = self
@@ -31,6 +33,15 @@ function stage:load()
 end
 
 function stage:update() end
+
+function stage:exit_right()
+  current_stage=current_stage.right()
+  pl.x=1
+end
+function stage:exit_left()
+  current_stage=current_stage.left()
+  pl.x=current_stage.width-pl.w
+end
 
 function stage:draw()
   self:draw_sky()
@@ -79,13 +90,8 @@ function set_camera()
 end
 
 starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,tile_h=16})
-function starting_area:draw()
-  rectfill(0,0,128,128,12)
-  stage.draw(self)
-end
-function starting_area:exit_right()
-  current_stage=schoolhouse_entrance
-  pl.x=0
+function starting_area:right()
+  return schoolhouse_entrance
 end
 
 schoolhouse_entrance=stage:new({
@@ -96,13 +102,11 @@ schoolhouse_entrance=stage:new({
     {12,8}
   }
 })
-function schoolhouse_entrance:exit_left()
-  current_stage=starting_area
-  pl.x=125
+function schoolhouse_entrance:left()
+  return starting_area
 end
-function schoolhouse_entrance:exit_right()
-  current_stage=blueberry_lane
-  pl.x=0
+function schoolhouse_entrance:right()
+  return blueberry_lane
 end
 
 blueberry_lane=stage:new({
@@ -113,31 +117,71 @@ blueberry_lane=stage:new({
     {12,2}
   }
 })
-function blueberry_lane:exit_left()
-  current_stage=schoolhouse_entrance
-  pl.x=125
+function blueberry_lane:left()
+  return schoolhouse_entrance
 end
-function blueberry_lane:exit_right()
-  current_stage=fountain
-  pl.x=0
+function blueberry_lane:right()
+  return fountain
 end
 
 fountain=stage:new({tile_sx=65,tile_sy=0,tile_w=16,tile_h=16,width=16*8})
-function fountain:exit_left()
-  current_stage=blueberry_lane
-  pl.x=blueberry_lane.width
+function fountain:left()
+  return blueberry_lane
 end
-function fountain:exit_right()
-  current_stage=starting_area
-  pl.x=0
+function fountain:right()
+  return rosemary_way
+end
+
+rosemary_way=stage:new({
+  tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8,
+  palette_swaps={
+    {14,4},
+    {2,4},
+    {8,15},
+    {3,15},
+    {12,15},
+    {1,9},
+  }
+})
+function rosemary_way:left()
+  return fountain
+end
+function rosemary_way:right()
+  return library_entrance
+end
+
+library_entrance=stage:new({
+  tile_sx=81,tile_y=0,tile_w=16,tile_h=16,width=16*8
+})
+function library_entrance:left()
+  return rosemary_way
+end
+function library_entrance:right()
+  return cemetery_path
+end
+
+cemetery_path=stage:new({
+  tile_sx=97,tile_sy=0,tile_w=16,tile_h=16,width=16*8
+})
+function cemetery_path:left()
+  return library_entrance
+end
+function cemetery_path:right()
+  return cemetery
+end
+
+cemetery=stage:new({
+  tile_sx=0,tile_sy=16,tile_w=16,tile_h=16
+})
+function cemetery:left()
+  return cemetery_path
 end
 
 room=stage:new()
 function room:draw()
   map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
 end
-
-prison=room:new({tile_sx=19,tile_sy=21,tile_w=7,tile_h=5,width=7*8,height=5*8})
+blueberry_lane_1=room:new({tile_sx=19,tile_sy=21,tile_w=7,tile_h=5,width=7*8,height=5*8})
 
 dialog = {
  message="",
@@ -266,9 +310,9 @@ player = entity:new({
 
 function player:update()
   self:process_buttons()
+  self:check_boundaries()
   self:collide_and_move()
   self:select_frames()
-  self:check_boundaries()
 end
 
 function player:collide_and_move()
@@ -345,11 +389,19 @@ function player:select_frames()
 end
 
 function player:check_boundaries()
-  if self.x > current_stage.width and current_stage.exit_right then
+  if self.x+self.dx+self.w/2 > current_stage.width then
+   if current_stage.right then
     self.x=0
     current_stage:exit_right()
-  elseif self.x < -5 and current_stage.exit_left then
-    current_stage:exit_left()
+   else
+    self.dx=0
+   end
+ elseif self.x+self.dx < -5 then
+    if current_stage.left then
+      current_stage:exit_left()
+    else
+      self.dx=0
+    end
   end
 end
 
@@ -453,7 +505,7 @@ function initialize_actors()
     sugar_maestro,
   }
   blueberry_lane.actors={
-    door:new({x=20,y=70,room=prison}),
+    door:new({x=20,y=70,room=blueberry_lane_1}),
   }
   fountain.actors={
     stargazer,
@@ -462,7 +514,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=blueberry_lane
+ current_stage=starting_area
  initialize_actors()
  pl = player:new({x=30,y=20})
 end

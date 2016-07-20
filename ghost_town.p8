@@ -60,7 +60,7 @@ function stage:draw()
 end
 
 function stage:draw_sky()
-  if (t%500==0) sunset+=1
+  if (t%250==0) sunset+=1
   local width=self.width-1
   rectfill(0,0,width,11+sunset/4,1)
   rectfill(0,12+sunset/4,width,23+sunset/3,2)
@@ -98,7 +98,7 @@ schoolhouse_entrance=stage:new({
   tile_sx=16,tile_sy=0,tile_w=16,tile_h=16,
   palette_swaps={
     {14,2},
-    {3,8},
+    {10,8},
     {12,8}
   }
 })
@@ -113,7 +113,7 @@ blueberry_lane=stage:new({
   tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8,
   palette_swaps={
     {14,1},
-    {3,1},
+    {10,1},
     {12,2}
   }
 })
@@ -137,8 +137,8 @@ rosemary_way=stage:new({
   palette_swaps={
     {14,4},
     {2,4},
+    {10,15},
     {8,15},
-    {3,15},
     {12,15},
     {1,9},
   }
@@ -514,7 +514,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=starting_area
+ current_stage=rosemary_way
  initialize_actors()
  pl = player:new({x=30,y=20})
 end
@@ -837,4 +837,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

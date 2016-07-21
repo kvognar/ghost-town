@@ -613,7 +613,7 @@ wipe={x=0,dx=0,callback=nil,}
 function wipe:init(dir,callback)
   wiping=true
   self.callback=callback
-  self.x=-128*dir
+  self.x=-200*dir
   self.dx=15*dir
 end
 
@@ -625,13 +625,13 @@ function wipe:update()
     self.callback=nil
   end
 
-  if self.x>130 or self.x<-130 then
+  if self.x>200 or self.x<-200 then
     wiping=false
   end
 end
 
 function wipe:draw()
-  rectfill(wipe.x,0,wipe.x+128,127,0)
+  rectfill(wipe.x,0,wipe.x+200,127,0)
 end
 
 

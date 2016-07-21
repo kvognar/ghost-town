@@ -194,6 +194,15 @@ function room:exit_left()
   end)
 end
 blueberry_lane_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_2=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_3=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_4=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+
+rosemary_way_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+rosemary_way_2=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+rosemary_way_3=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+rosemary_way_4=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+
 schoolhouse=room:new({tile_sx=16,tile_sy=16,tile_w=14,tile_h=9,width=14*8,height=9*8})
 function schoolhouse:draw()
   rectfill(8,8,103,63,15)
@@ -306,7 +315,7 @@ function entity:draw()
   if self.current_frames and #self.current_frames > 0 then
     spr(self.current_frames[self.frame_index],self.x,self.y,self.spr_w,self.spr_h,self.facing_left)
   else
-    -- rectfill(self.x,self.y,self.x+self.w,self.y+self.h,8)
+    rectfill(self.x,self.y,self.x+self.w,self.y+self.h,8)
   end
 end
 
@@ -553,6 +562,9 @@ function initialize_actors()
   }
   blueberry_lane.actors={
     door:new({x=19,y=62,w=10,h=16,room=blueberry_lane_1}),
+    door:new({x=99,y=62,w=10,h=16,room=blueberry_lane_2}),
+    door:new({x=155,y=62,w=10,h=16,room=blueberry_lane_3}),
+    door:new({x=235,y=62,w=10,h=16,room=blueberry_lane_4}),
   }
   fountain.actors={
     stargazer,
@@ -561,7 +573,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=schoolhouse_entrance
+ current_stage=blueberry_lane
  initialize_actors()
  pl = player:new({x=30,y=20})
 end
@@ -961,3 +973,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+

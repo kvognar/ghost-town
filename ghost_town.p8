@@ -32,12 +32,16 @@ end
 function stage:update() end
 
 function stage:exit_right()
-  current_stage=current_stage.right()
-  pl.x=1
+  wipe:init(1, function()
+    current_stage=current_stage.right()
+    pl.x=1
+  end)
 end
 function stage:exit_left()
-  current_stage=current_stage.left()
-  pl.x=current_stage.width-pl.w
+  wipe:init(-1, function()
+    current_stage=current_stage.left()
+    pl.x=current_stage.width-pl.w
+  end)
 end
 function stage:fade_to(callback)
   fading=true
@@ -413,7 +417,6 @@ end
 function player:check_boundaries()
   if self.x+self.dx+self.w/2 > current_stage.width then
    if current_stage.right then
-    self.x=0
     current_stage:exit_right()
    else
     self.dx=0
@@ -596,6 +599,7 @@ function fade_update()
   if fade_index == 1 then
     fading=false
     fade_direction=1
+    pal()
   end
 end
 
@@ -605,10 +609,37 @@ function fade_palette()
   end
 end
 
+wipe={x=0,dx=0,callback=nil,}
+function wipe:init(dir,callback)
+  wiping=true
+  self.callback=callback
+  self.x=-128*dir
+  self.dx=15*dir
+end
+
+function wipe:update()
+  self.x+=self.dx
+  --switch stages when the entire screen is black
+  if self.x*self.dx>0 and self.callback then
+    self.callback()
+    self.callback=nil
+  end
+
+  if self.x>130 or self.x<-130 then
+    wiping=false
+  end
+end
+
+function wipe:draw()
+  rectfill(wipe.x,0,wipe.x+128,127,0)
+end
+
 
 function _update()
   if fading then
     fade_update()
+  elseif wiping then
+    wipe:update()
   else
    current_stage:update()
    if (not speaking) pl:update()
@@ -629,7 +660,8 @@ function _draw()
  end)
  pl:draw()
  dialog:draw()
- fade_palette()
+ if (fading) fade_palette()
+ if (wiping) wipe:draw()
 end
 
 -- let's make something appear under the dialog box sometime

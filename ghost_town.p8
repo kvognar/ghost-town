@@ -507,14 +507,32 @@ teacher=ghost:new({
   name="mrs. finch"
 })
 
--- scientist=ghost:new({
---   phrases={
---     ""
---   }
--- })
+scientist=ghost:new({
+  phrases={
+    "so here's something to consider about ghosthood:",
+    'i have no body. my "eye" has no lens to refract light, and no retina to absorb it.',
+    "and yet i can see you all the same.",
+    "in my time as a ghost, i have learned that my perception is limited only by my attention.",
+    "if i focus, i can see radio waves, infrared light, and the occasional cosmic ray.",
+    "i can watch as electrons are stripped from glucose molecules and harnessed for muscle contraction.",
+    "sodium ion cascades in your neurons are as clear to me as waves on the ocean.",
+    "\141 i can see your blood flow \141 \141 i can see your cells grow \141",
+    "the mechanics of your body are a symphony - one that i used to play in as well.",
+    "what a shame that, now that i can see how our bodies worked, it no longer means anything to me.",
+    "i suppose i will have the rest of eternity to learn what ghosts are."
+  },
+  x=46,
+  y=24,
+  spr_h=2,
+  spr_w=2,
+  h=16,
+  current_frames={232},
+  name="dr. vera, phd",
+})
 
 stargazer=ghost:new({
-  phrases={"i always wondered why ghosts were supposed to haunt places.",
+  phrases={
+    "i always wondered why ghosts were supposed to haunt places.",
 "why stick around in some dusty old ruin?",
 "you don't get hungry, you don't get tired, you can't get hurt. and you can fly!",
 "go explore! there's a hundred billion lifetimes of things to see on this planet alone.",
@@ -570,7 +588,6 @@ end
 
 function initialize_actors()
   starting_area.actors={
-    little_ghost,
   }
   schoolhouse_entrance.actors={
     sugar_captain,
@@ -586,6 +603,9 @@ function initialize_actors()
     door:new({x=155,y=62,w=10,h=16,room=blueberry_lane_3}),
     door:new({x=235,y=62,w=10,h=16,room=blueberry_lane_4}),
   }
+  blueberry_lane_1.actors={
+    scientist,
+  }
   fountain.actors={
     stargazer,
   }
@@ -593,7 +613,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=schoolhouse_entrance
+ current_stage=blueberry_lane
  initialize_actors()
  pl = player:new({x=30,y=20})
 end

@@ -482,7 +482,21 @@ sugar_maestro=ghost:new({
 })
 
 teacher=ghost:new({
-  phrases={"thanks for being so good with the kids.", "we were studying sugar gliders before it happened."},
+  phrases={
+    "thanks for being so patient with the kids.",
+    "we were learning about marsupials the day we died.",
+    "they love sugar gliders like i loved armadillos when i was in school.",
+    "i don't curl up and roll around the yard like i used to, though.",
+    "you know, you grow up and you get to know the world, you learn about math and art and weird bugs...",
+    "and then you get used to it.",
+    "snowflakes are still pretty. poe is still gloomy. fennec foxes are still adorable.",
+    "but nothing really hits you the way it did when you were a kid.",
+    "when i teach my students about sugar gliders or photosynthesis or shel silverstein, though...",
+    "i get to be amazed with them all over again.",
+    "now we're dead, and it looks like lessons are over.",
+    "but this afterlife business is a new experience. whatever comes next, we'll all be learning together.",
+    "my students will be brilliant ghosts, i'm sure of it."
+  },
   current_frames={195},
   x=86,
   y=48,
@@ -490,8 +504,14 @@ teacher=ghost:new({
   spr_w=2,
   h=16,
   facing_left=true,
-  name="professor bumblebee"
+  name="mrs. finch"
 })
+
+-- scientist=ghost:new({
+--   phrases={
+--     ""
+--   }
+-- })
 
 stargazer=ghost:new({
   phrases={"i always wondered why ghosts were supposed to haunt places.",
@@ -573,7 +593,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=blueberry_lane
+ current_stage=schoolhouse_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
 end
@@ -973,4 +993,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

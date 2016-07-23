@@ -343,6 +343,7 @@ player = entity:new({
     upjump={3},
     downjump={4},
   },
+  icon_offset=1,
 })
 
 function player:update()
@@ -350,6 +351,16 @@ function player:update()
   self:check_boundaries()
   self:collide_and_move()
   self:select_frames()
+end
+
+function player:draw()
+  entity.draw(self)
+
+  if (t%20==0) self.icon_offset*=-1
+  local other = colliding_actor()
+  if other and other.icon and not speaking then
+    spr(other.icon,self.x,self.y-(10+self.icon_offset))
+  end
 end
 
 function player:collide_and_move()
@@ -397,7 +408,7 @@ function player:process_buttons()
   end
 
   local other = colliding_actor()
-  if other and btnp(b.x) then
+  if other and btnp(other.button) then
     other:interact()
   end
 
@@ -441,10 +452,12 @@ function player:check_boundaries()
   end
 end
 
-ghost = entity:new({
+ghost=entity:new({
   phrases={},
   current_frames={123,124,125,126,127,126,125,124},
   w=12,
+  button=b.x,
+  icon=90,
 })
 
 function ghost:interact()
@@ -565,7 +578,7 @@ function colliding_actor()
   end
 end
 
-door = entity:new({w=12,h=19})
+door = entity:new({w=12,h=19,icon=91,button=b.down})
 function door:interact()
   -- set up exit
   self.return_stage=current_stage
@@ -621,7 +634,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=library_entrance
+ current_stage=fountain
  initialize_actors()
  pl = player:new({x=30,y=20})
 end
@@ -1021,4 +1034,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

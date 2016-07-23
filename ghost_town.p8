@@ -193,10 +193,10 @@ function room:exit_left()
     pl.y=68
   end)
 end
-blueberry_lane_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-blueberry_lane_2=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-blueberry_lane_3=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-blueberry_lane_4=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_1=room:new({tile_sx=30,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_2=room:new({tile_sx=39,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_3=room:new({tile_sx=30,tile_sy=22,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_4=room:new({tile_sx=39,tile_sy=22,tile_w=9,tile_h=6,width=9*8,height=6*8})
 
 rosemary_way_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
 rosemary_way_2=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
@@ -583,7 +583,10 @@ function add_actor(actor_class, options)
 end
 
 function get_tile(x,y)
-  return mget(flr(x/8)+current_stage.tile_sx,flr(y/8)+current_stage.tile_sy)
+  x=flr(x/8)+current_stage.tile_sx
+  y=flr(y/8)+current_stage.tile_sy
+  if (x<current_stage.tile_sx or x>current_stage.tile_sx+current_stage.tile_w) return nil
+  return mget(x,y)
 end
 
 function initialize_actors()
@@ -1013,4 +1016,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-

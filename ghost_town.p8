@@ -217,6 +217,11 @@ function schoolhouse:draw()
 end
 
 library=room:new({tile_sx=48,tile_sy=16,tile_w=14,tile_h=9,width=14*8,height=9*8})
+function library:draw()
+  rectfill(8,8,103,63,15)
+  rectfill(0,40,8,71,15)
+  room.draw(self)
+end
 
 dialog = {
  message="",
@@ -562,6 +567,17 @@ y=70,
 name="stargazer"
 })
 
+librarian=ghost:new({
+  phrases={
+    "Hello! Would you like to check out a book?",
+  },
+  current_frames={192},
+  spr_h=2,
+  x=25,
+  y=48,
+  name="library ann"
+})
+
 function is_solid(x,y)
   return fget(get_tile(x,y)) == 1
 end
@@ -630,11 +646,15 @@ function initialize_actors()
   library_entrance.actors={
     door:new({x=53,y=60,w=13,h=16,room=library})
   }
+
+  library.actors={
+    librarian,
+  }
 end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=fountain
+ current_stage=library_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
 end

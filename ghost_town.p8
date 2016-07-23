@@ -216,6 +216,8 @@ function schoolhouse:draw()
   print("abcdefghilmnoprstuvwxyz",10,9,1)
 end
 
+library=room:new({tile_sx=48,tile_sy=16,tile_w=14,tile_h=9,width=14*8,height=9*8})
+
 dialog = {
  message="",
  phrases={},
@@ -612,11 +614,14 @@ function initialize_actors()
   fountain.actors={
     stargazer,
   }
+  library_entrance.actors={
+    door:new({x=53,y=60,w=13,h=16,room=library})
+  }
 end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=blueberry_lane
+ current_stage=library_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
 end
@@ -1016,3 +1021,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+

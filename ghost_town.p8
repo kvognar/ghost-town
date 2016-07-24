@@ -61,7 +61,7 @@ function stage:draw()
 end
 
 function stage:draw_sky()
-  if (t%250==0) sunset+=1
+  if (t%100==0) sunset+=1
   local width=self.width-1
   rectfill(0,0,width,11+sunset/4,1)
   rectfill(0,12+sunset/4,width,23+sunset/3,2)
@@ -275,7 +275,7 @@ function dialog:advance()
   self.index=0
   self.line_index=0
  else
-   if (self.callback) self.callback()
+   if (self.callback) self.callback(self.speaker)
   speaking=false
  end
 end
@@ -463,30 +463,52 @@ ghost=entity:new({
   w=12,
   button=b.x,
   icon=90,
+  phrase_index=1,
 })
 
 function ghost:interact()
-  dialog:init(self.phrases,self)
+  dialog:init(self.phrases[self.phrase_index][1],
+  self,
+  self.phrases[self.phrase_index][2])
 end
 
 function ghost:update()
   if t%8==0 then
     self.frame_index = (self.frame_index%#self.current_frames)+1
   end
+  if self.blinking then
+    self.blink_counter-=1
+    if self.blink_counter<0 then
+      self.blinking=false
+      self:blink_callback()
+    end
+  end
+end
+
+function ghost:vanish_to(stage)
+  self:blink(function(self)
+    del(current_stage.actors,self)
+    add(stage.actors,self)
+  end)
+end
+
+function ghost:blink(callback)
+  self.blinking=true
+  self.blink_counter=30
+  self.blink_callback=callback
+end
+
+function ghost:draw()
+  if (self.blinking and t%2==0) return
+  entity.draw(self)
 end
 
 -- define npcs
 
-little_ghost=ghost:new({
-  phrases={"hey, you look familiar.", "i think i'd like to be as tall as you someday."},
-  current_frames={123,124,125,126,127,126,125,124},
-  x=64,
-  y=70,
-  name="little ghost"
-})
-
 sugar_captain=ghost:new({
-  phrases={"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like eucalyptus sap and honeydew!"},
+  phrases={
+    {{"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like eucalyptus sap and honeydew!"}}
+  },
   current_frames={78},
   x=80,
   y=70,
@@ -494,7 +516,9 @@ sugar_captain=ghost:new({
 })
 
 sugar_maestro=ghost:new({
-  phrases={"shh, i'm in torpor.", "that's like a nap, but way nappier."},
+  phrases={
+{{    "shh, i'm in torpor.", "that's like a nap, but way nappier."
+}}  },
   current_frames={77},
   x=20,
   y=70,
@@ -503,7 +527,7 @@ sugar_maestro=ghost:new({
 
 teacher=ghost:new({
   phrases={
-    "thanks for being so patient with the kids.",
+{{    "thanks for being so patient with the kids.",
     "we were learning about marsupials the day we died.",
     "they love sugar gliders like i loved armadillos when i was in school.",
     "i don't curl up and roll around the yard like i used to, though.",
@@ -516,7 +540,7 @@ teacher=ghost:new({
     "now we're dead, and it looks like lessons are over.",
     "but this afterlife business is a new experience. whatever comes next, we'll all be learning together.",
     "my students will be brilliant ghosts, i'm sure of it."
-  },
+}}  },
   current_frames={195},
   x=86,
   y=48,
@@ -529,7 +553,7 @@ teacher=ghost:new({
 
 scientist=ghost:new({
   phrases={
-    "so here's something to consider about ghosthood:",
+{{    "so here's something to consider about ghosthood:",
     'i have no body. my "eye" has no lens to refract light, and no retina to absorb it.',
     "and yet i can see you all the same.",
     "in my time as a ghost, i have learned that my perception is limited only by my attention.",
@@ -540,7 +564,7 @@ scientist=ghost:new({
     "the mechanics of your body are a symphony - one that i used to play in as well.",
     "what a shame that, now that i can see how our bodies worked, it no longer means anything to me.",
     "i suppose i will have the rest of eternity to learn what ghosts are."
-  },
+}}  },
   x=46,
   y=24,
   spr_h=2,
@@ -552,7 +576,7 @@ scientist=ghost:new({
 
 stargazer=ghost:new({
   phrases={
-    "i always wondered why ghosts were supposed to haunt places.",
+    {{"i always wondered why ghosts were supposed to haunt places.",
 "why stick around in some dusty old ruin?",
 "you don't get hungry, you don't get tired, you can't get hurt. and you can fly!",
 "go explore! there's a hundred billion lifetimes of things to see on this planet alone.",
@@ -560,7 +584,8 @@ stargazer=ghost:new({
 "thousands of years of interstellar travel is nothing if you're immortal.",
 "just be patient, and one day you'll find another world to explore.",
 ". . .",
-"i say that, and yet i'm stuck here.",},
+"i say that, and yet i'm stuck here."}},
+},
 current_frames={79},
 x=20,
 y=70,
@@ -569,10 +594,11 @@ name="stargazer"
 
 librarian=ghost:new({
   phrases={
-    "Hello! Would you like to check out a book?",
+    {{"Hello! Would you like to check out a book?"},function(self) self:vanish_to(fountain) end},
   },
   current_frames={192},
   spr_h=2,
+  h=16,
   x=25,
   y=48,
   name="library ann"
@@ -641,6 +667,8 @@ function initialize_actors()
     scientist,
   }
   fountain.actors={
+  }
+  rosemary_way.actors={
     stargazer,
   }
   library_entrance.actors={

@@ -17,12 +17,15 @@ cam={x=0,y=0}
 
 actors = {}
 
-stage = {tile_sx=0,tile_sy=0,width=128,height=128,actors={},palette_swaps={}}
+stage = {tile_sx=0,tile_sy=0,tile_w=16,tile_h=16,actors={},palette_swaps={}}
 
 function stage:new(attrs)
   attrs=attrs or {}
   attrs._super = self
-  return setmetatable(attrs,{__index=self})
+  setmetatable(attrs,{__index=self})
+  attrs.width=attrs.tile_w*8
+  attrs.height=attrs.tile_h*8
+  return attrs
 end
 
 function stage:load()
@@ -92,13 +95,13 @@ function set_camera()
   camera(cam.x,cam.y)
 end
 
-starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,tile_h=16})
+starting_area=stage:new({tile_sx=0,tile_sy=0,tile_w=16,})
 function starting_area:right()
   return schoolhouse_entrance
 end
 
 schoolhouse_entrance=stage:new({
-  tile_sx=16,tile_sy=0,tile_w=16,tile_h=16,
+  tile_sx=16,tile_sy=0,tile_w=16,
   palette_swaps={
     {14,2},
     {10,8},
@@ -113,7 +116,7 @@ function schoolhouse_entrance:right()
 end
 
 blueberry_lane=stage:new({
-  tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8,
+  tile_sx=32,tile_sy=0,tile_w=33,
   palette_swaps={
     {12,13},
     {8,12},
@@ -129,7 +132,7 @@ function blueberry_lane:right()
   return fountain
 end
 
-fountain=stage:new({tile_sx=65,tile_sy=0,tile_w=16,tile_h=16,width=16*8})
+fountain=stage:new({tile_sx=65,tile_sy=0,})
 function fountain:left()
   return blueberry_lane
 end
@@ -138,7 +141,7 @@ function fountain:right()
 end
 
 rosemary_way=stage:new({
-  tile_sx=32,tile_sy=0,tile_w=33,tile_h=16,width=33*8,
+  tile_sx=32,tile_sy=0,tile_w=33,
   palette_swaps={
     {14,4},
     {2,4},
@@ -156,7 +159,7 @@ function rosemary_way:right()
 end
 
 library_entrance=stage:new({
-  tile_sx=81,tile_y=0,tile_w=16,tile_h=16,width=16*8
+  tile_sx=81,tile_y=0,
 })
 function library_entrance:left()
   return rosemary_way
@@ -166,7 +169,7 @@ function library_entrance:right()
 end
 
 cemetery_path=stage:new({
-  tile_sx=97,tile_sy=0,tile_w=16,tile_h=16,width=16*8
+  tile_sx=97,tile_sy=0,
 })
 function cemetery_path:left()
   return library_entrance
@@ -176,7 +179,7 @@ function cemetery_path:right()
 end
 
 cemetery=stage:new({
-  tile_sx=0,tile_sy=16,tile_w=16,tile_h=16
+  tile_sx=0,tile_sy=16,
 })
 function cemetery:left()
   return cemetery_path
@@ -193,17 +196,17 @@ function room:exit_left()
     pl.y=68
   end)
 end
-blueberry_lane_1=room:new({tile_sx=30,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-blueberry_lane_2=room:new({tile_sx=39,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-blueberry_lane_3=room:new({tile_sx=30,tile_sy=22,tile_w=9,tile_h=6,width=9*8,height=6*8})
-blueberry_lane_4=room:new({tile_sx=39,tile_sy=22,tile_w=9,tile_h=6,width=9*8,height=6*8})
+blueberry_lane_1=room:new({tile_sx=30,tile_sy=16,tile_w=9,tile_h=6,})
+blueberry_lane_2=room:new({tile_sx=39,tile_sy=16,tile_w=9,tile_h=6,})
+blueberry_lane_3=room:new({tile_sx=30,tile_sy=22,tile_w=9,tile_h=6,})
+blueberry_lane_4=room:new({tile_sx=39,tile_sy=22,tile_w=9,tile_h=6,})
 
-rosemary_way_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-rosemary_way_2=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-rosemary_way_3=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
-rosemary_way_4=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,width=9*8,height=6*8})
+rosemary_way_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,})
+rosemary_way_2=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,})
+rosemary_way_3=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,})
+rosemary_way_4=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,})
 
-schoolhouse=room:new({tile_sx=16,tile_sy=16,tile_w=14,tile_h=9,width=14*8,height=9*8})
+schoolhouse=room:new({tile_sx=16,tile_sy=16,tile_w=14,tile_h=9,})
 function schoolhouse:draw()
   rectfill(8,8,103,63,15)
   rectfill(0,40,8,71,15)
@@ -216,7 +219,7 @@ function schoolhouse:draw()
   print("abcdefghilmnoprstuvwxyz",10,9,1)
 end
 
-library=room:new({tile_sx=48,tile_sy=16,tile_w=14,tile_h=9,width=14*8,height=9*8})
+library=room:new({tile_sx=48,tile_sy=16,tile_w=14,tile_h=9,})
 function library:draw()
   rectfill(8,8,103,63,15)
   rectfill(0,40,8,71,15)
@@ -594,7 +597,7 @@ name="stargazer"
 
 librarian=ghost:new({
   phrases={
-    {{"Hello! Would you like to check out a book?"},function(self) self:vanish_to(fountain) end},
+    {{"hello! would you like to check out a book?"},function(self) self:vanish_to(fountain) end},
   },
   current_frames={192},
   spr_h=2,

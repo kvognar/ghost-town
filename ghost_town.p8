@@ -614,13 +614,15 @@ mourner=ghost:new({
   current_frames={197},
   sx=64,
   sy=30,
-  name="kathlyn"
+  name="kathlyn",
+  offset=0,
 })
 function mourner:update()
-  local new_x=self.sx+30*sin(t/300)
+  local new_x=self.sx+30*sin(self.offset/300)
   self.facing_left=new_x<self.x
   self.x=new_x
-  self.y=self.sy+10*sin(t/500)
+  self.y=self.sy+10*sin(self.offset/500)
+  self.offset+=1
 end
 
 function is_solid(x,y)

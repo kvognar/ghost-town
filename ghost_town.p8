@@ -573,6 +573,8 @@ scientist=ghost:new({
   spr_h=2,
   spr_w=2,
   h=16,
+  eye_x=37,
+  eye_y=27,
   current_frames={236},
   name="dr. vera, phd",
 })
@@ -721,7 +723,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=blueberry_lane_1
+ current_stage=blueberry_lane
  initialize_actors()
  pl = player:new({x=30,y=20})
 end

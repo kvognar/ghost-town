@@ -605,7 +605,8 @@ scaredy_ghost=ghost:new({
 
 tea_ghost=ghost:new({
   phrases={
-    {{}}
+    {{"hello! would you like some tea?",
+  }}
   },
   current_frames={242},
   x=36,
@@ -641,16 +642,20 @@ stargazer=ghost:new({
     {{"i always wondered why ghosts were supposed to haunt places.",
 "why stick around in some dusty old ruin?",
 "you don't get hungry, you don't get tired, you can't get hurt. and you can fly!",
-"go explore! there's a hundreds billion lifetimes of things to see on this planet alone.",
+"go explore! there's a hundred billion lifetimes of things to see on this planet alone.",
 "and why not explore the stars? gravity is nothing to a ghost.",
 "thousands of years of interstellar travel is nothing if you're immortal.",
 "just be patient, and one day you'll find another world to explore.",
 ". . .",
 "i say that, and yet i'm stuck here."}},
 },
-current_frames={79},
-x=20,
-y=70,
+current_frames={193},
+spr_w=2,
+spr_h=2,
+width=10,
+height=12,
+x=22,
+y=28,
 name="stargazer"
 })
 
@@ -787,7 +792,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=cemetery
+ current_stage=rosemary_way
  initialize_actors()
  pl = player:new({x=30,y=20})
 end

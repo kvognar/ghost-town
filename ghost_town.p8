@@ -21,15 +21,10 @@ stage = {tile_sx=0,tile_sy=0,tile_w=16,tile_h=16,actors={},palette_swaps={}}
 
 function stage:new(attrs)
   attrs=attrs or {}
-  attrs._super = self
   setmetatable(attrs,{__index=self})
   attrs.width=attrs.tile_w*8
   attrs.height=attrs.tile_h*8
   return attrs
-end
-
-function stage:load()
-  actors={}
 end
 
 function stage:update() end
@@ -317,7 +312,6 @@ entity = {x=0,y=0,dx=0,dy=0,damping=1,w=5,h=8,spr_w=1,spr_h=1,frames={},frame_in
 
 function entity:new(attrs)
   attrs = attrs or {}
-  attrs._super = self
   return setmetatable(attrs,{__index=self})
 end
 
@@ -497,7 +491,7 @@ end
 
 function ghost:blink(callback)
   self.blinking=true
-  self.blink_counter=30
+  self.blink_counter=20
   self.blink_callback=callback
 end
 
@@ -852,7 +846,6 @@ function _draw()
  if (wiping) wipe:draw()
 end
 
--- let's make something appear under the dialog box sometime
 -- "good morning. the day is still young yet, and there are adventures to be had.",
 __gfx__
 00eeee00000000000000000000eeee000000000000eeee00333333330000b00000000000000000000000000000000000333f3f3fffffffff0000000000000000

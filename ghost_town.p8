@@ -589,12 +589,14 @@ end
 
 scaredy_ghost=ghost:new({
   phrases={
-    {{}}
+    {{"th... there are ghosts all over this town! Don't you see them?",
+    "run! run for your life!"
+  }}
   },
   current_frames={241},
   x=54,
   y=32,
-  name="Clyde",
+  name="clyde",
 })
 
 tea_ghost=ghost:new({
@@ -604,7 +606,30 @@ tea_ghost=ghost:new({
   current_frames={242},
   x=36,
   y=32,
-  name="Alex",
+  name="alex",
+})
+
+erwin=ghost:new({
+  phrases={
+    {{"when i was alive i wanted to be so many things.",
+    "a botanist, a filmmaker, a stay-at-home dad,",
+    "a baker, a chemist, a barkeep, a monk.",
+    "i could never decide, and i ended up sitting in the middle of everything i could be,",
+    "turning into absolutely nobody.",
+    "and then one day there's this flash, and i'm dead, and i never got to do any of it.",
+    "what a weird unfairness of life that it should have too many good things, right?",
+    "well.",
+    "i don't know what this afterlife thing has to offer,",
+    "but you can bet i won't let the world pass me by a second time."
+  }}
+  },
+  current_frames={198},
+  x=46,
+  y=26,
+  spr_h=2,
+  spr_w=2,
+  h=12,
+  name="erwin",
 })
 
 stargazer=ghost:new({
@@ -720,6 +745,9 @@ function initialize_actors()
   }
   blueberry_lane_2.actors={
     scientist,
+  }
+  blueberry_lane_3.actors={
+    erwin,
   }
 
 

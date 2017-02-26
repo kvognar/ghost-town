@@ -482,6 +482,10 @@ function ghost:update()
   end
 end
 
+function ghost:increment_phrase()
+  self.phrase_index+=1
+end
+
 function ghost:vanish_to(stage)
   self:blink(function(self)
     del(current_stage.actors,self)
@@ -664,11 +668,23 @@ librarian=ghost:new({
 
 mourner=ghost:new({
   phrases={
-  {{}}
+  {{"hi."}, ghost.increment_phrase},
+  {{"uh. i mean, boo?"}, ghost.increment_phrase},
+  {{"sorry. not feeling very spooktacular today.",
+  "i was here visiting my nan the day i died.",
+  "the actual dying part was kind of a bummer, as you might expect,",
+  "but when i realized i'd turned all ectoplasmic, i got kind of excited.",
+  "i thought i'd get to see my family again - that maybe nan was waiting here for me.",
+  "but, nope. nothing here but me and a bunch of old rocks.",
+  "here lies kat, the only ghost in a field full of dead people.",
+  "what kind of loser ghost haunts a graveyard by herself?",
+  ". . .",
+  "i just want my nanna back."
+}}
   },
   current_frames={197},
   sx=64,
-  sy=30,
+  sy=60,
   name="kathlyn",
   offset=0,
 })
@@ -771,7 +787,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=blueberry_lane
+ current_stage=cemetery
  initialize_actors()
  pl = player:new({x=30,y=20})
 end

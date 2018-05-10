@@ -380,11 +380,30 @@ function is_solid(x,y)
 end
 
 function colliding_actor()
+  chatbox = {
+    x=pl.x,
+    y=pl.y,
+    w=pl.w,
+    h=pl.h
+  }
+  if pl.facing_left then
+    chatbox.x-=8
+  else
+    chatbox.x+=8
+  end
+
   for a in all(current_stage.actors) do
-    if pl.x+pl.w > a.x and
-       a.x+a.w > pl.x and
-       pl.y+pl.h > a.y and
-       a.y+a.h > pl.y
+    -- collide in front of player if it's a person
+    -- collide directly with player otherwise
+    if a.name then
+      collider=chatbox
+    else
+      collider=pl
+    end
+    if collider.x+collider.w > a.x and
+       a.x+a.w > collider.x and
+       collider.y+collider.h > a.y and
+       a.y+a.h > collider.y
     then
       return a
     end

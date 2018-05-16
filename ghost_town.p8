@@ -623,7 +623,7 @@ teacher=ghost:new({
   phrases={
 {{    "thanks for being so patient with the kids.",
     "we were learning about marsupials the day we died.",
-    "they love sugar gliders like i loved armadillos when i was in school.",
+    "they love sugar gliders like i loved armadillos back then.",
     "i don't curl up and roll around the yard like i used to, though.",
     "you know, you grow up and you get to know the world, you learn about math and art and weird bugs...",
     "and then you get used to it.",
@@ -736,7 +736,8 @@ stargazer=ghost:new({
 "why stick around in some dusty old ruin?",
 "you don't get hungry, you don't get tired, you can't get hurt. and you can fly!",
 "go explore! there's a hundred billion lifetimes of things to see on this planet alone.",
-"and why not explore the stars? gravity is nothing to a ghost.",
+"and when you're done with that, you've got the rest of the universe waiting for you.",
+"gravity is nothing to a ghost.",
 "thousands of years of interstellar travel is nothing if you're immortal.",
 "just be patient, and one day you'll find another world to explore.",
 ". . .",
@@ -754,7 +755,21 @@ name="stargazer"
 
 librarian=ghost:new({
   phrases={
-    {{"hello! would you like to check out a book?"},function(self) self:vanish_to(fountain) end},
+    {
+      {
+        "hello! would you like to borrow a book?",
+        "...honestly, you can keep whatever you like here. the rest of us are over and done.",
+        "but, if you do, can you do me a favor, please?",
+        "the townfolk are good souls. i watched a lot of them grow up here.",
+        "i know their favorite books. i know what worried them, what excited them, what they looked forward to.",
+        "you can tell a lot about a person by what they choose to read.",
+        "it'll be time soon for us to move on, but before we all do...",
+        "can you meet with the others and write down their last words for me?",
+        "take the notebook with you when you're done, as a memento of what we used to be.",
+        "they deserve to be rememembered."
+      },
+      function(self) self:vanish_to(fountain) end
+    },
   },
   current_frames={192},
   spr_h=2,
@@ -830,6 +845,7 @@ ant=ghost:new({
     "do they watch over their descendants, warding off evil spirits?",
     "do they wander the earth, one little step at a time?",
     "do they even know they're dead?",
+    "maybe they swarm together into some sort of hive-soul.",
     "i have all of eternity ahead of me, and while that's kind of exciting,",
     "i think that i will never, ever know what it's like to be an ant.",
     "that whole slice of existence is closed off forever - ",
@@ -842,6 +858,14 @@ ant=ghost:new({
   spr_h=2,
   spr_w=5,
   name="mae"
+})
+
+flower=ghost:new({
+  phrases={
+    {{
+
+    }}
+  }
 })
 
 -->8

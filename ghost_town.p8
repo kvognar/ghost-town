@@ -471,13 +471,17 @@ function initialize_actors()
   rosemary_way.actors={
     stargazer,
     door:new({x=99, y=62, w=10, h=16, room=rosemary_way_2}),
-    door:new({x=155, y=62, w=10, h=16, room=rosemary_way_3})
+    door:new({x=155, y=62, w=10, h=16, room=rosemary_way_3}),
+    door:new({x=236, y=62, w=10, h=16, room=rosemary_way_4}),
   }
   rosemary_way_2.actors={
     ant,
   }
   rosemary_way_3.actors={
     statue,
+  }
+  rosemary_way_4.actors={
+    elder,
   }
 
   library_entrance.actors={
@@ -495,7 +499,7 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=starting_area
+ current_stage=library_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
 end
@@ -814,23 +818,25 @@ function mourner:update()
   self.offset+=1
 end
 elder=ghost:new({
-  phrases={{
-    "after ninety years you might think you know yourself.",
-    "you've been through the kiln, and your ways are set.",
-    "i lived for ninety years. i'm proud of the person i made of myself.",
-    "but i'm standing now in front of eternity.",
-    "who might i be in another ninety years?",
-    "in ten thousand?",
-    "in a trillion trillion centuries?",
-    "after all that time, these ninety years will be nothing in comparison.",
-    "i will be a ghost, through and through,",
-    "who just happened to sprout from a human long ago.",
-    "what do all these years matter when they shrink into eternity?",
-    "will i even remember what it was like to be alive?"
-  }},
+  phrases={
+    {{
+      "after a lifetime you might think you know yourself.",
+      "you've been through the kiln, and your ways are set.",
+      "i lived for ninety years. i'm proud of the person i made of myself.",
+      "but i'm standing now in front of eternity.",
+      "who might i be in another ninety years?",
+      "in ten thousand?",
+      "in a trillion trillion centuries?",
+      "after all that time, these ninety years will be nothing in comparison.",
+      "i will be a ghost, through and through,",
+      "who just happened to sprout from a human long ago.",
+      "what do all these years matter when they shrink into eternity?",
+      "will i even remember what it was like to be alive?"
+    }}
+  },
   current_frames={227},
-  x=25,
-  y=48,
+  x=45,
+  y=24,
   spr_h=2,
   spr_w=2,
   name="muriel",
@@ -1039,7 +1045,7 @@ blueberry_lane_4=room:new({tile_sx=39,tile_sy=22,tile_w=9,tile_h=6,})
 rosemary_way_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,})
 rosemary_way_2=room:new({tile_sx=30,tile_sy=22,tile_w=9,tile_h=6,})
 rosemary_way_3=room:new({tile_sx=30,tile_sy=16,tile_w=9,tile_h=6,})
-rosemary_way_4=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,})
+rosemary_way_4=room:new({tile_sx=30,tile_sy=16,tile_w=9,tile_h=6,})
 
 schoolhouse=room:new({tile_sx=16,tile_sy=16,tile_w=14,tile_h=9,})
 function schoolhouse:draw()

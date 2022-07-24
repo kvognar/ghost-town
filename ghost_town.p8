@@ -1,6 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 15
+version 36
 __lua__
+--setup
+
 t=0
 sunset=0
 speaking=false
@@ -40,10 +42,6 @@ function stage:exit_left()
     current_stage=current_stage.left()
     pl.x=current_stage.width-pl.w
   end)
-end
-function stage:fade_to(callback)
-  fading=true
-  fade_callback=callback
 end
 
 function stage:draw()
@@ -90,7 +88,7 @@ function set_camera()
   camera(cam.x,cam.y)
 end
 
-dialog = {
+dialog={
  message="",
  phrases={},
  phrase_index=1,
@@ -101,6 +99,12 @@ dialog = {
  w=127,
  h=32,
 }
+
+function dialog:new(attrs)
+ attrs=attrs or {}
+ return setmetatable(attrs,{__index=self})
+end
+
 function dialog:draw()
  camera()
  rectfill(self.x,self.y,self.x+self.w,self.y+self.h,0)
@@ -147,6 +151,13 @@ function dialog:advance()
  end
 end
 
+function dialog:rush()
+ while (self.index<#self.message) do
+  self.index+=1
+  self:insert_newlines()
+ end
+end
+
 function dialog:insert_newlines()
  if sub(self.message,self.index,self.index) == " "
  and 4*(self:next_word() - self.line_index) > self.w - 4
@@ -175,9 +186,19 @@ function dialog:init(phrases,speaker,callback)
   self.phrase_index=0
   self:advance()
   speaking=true
+  speaker.met=true
 end
 
-entity = {x=0,y=0,dx=0,dy=0,damping=1,w=5,h=8,spr_w=1,spr_h=1,frames={},frame_index=1,frametime=1,facing_left=false}
+entity = {
+ x=0,y=0,dx=0,dy=0,
+ damping=1,
+ w=5,h=8,
+ spr_w=1,spr_h=1,
+ frames={},
+ frame_index=1,
+ frametime=1,
+ facing_left=false
+ }
 
 function entity:new(attrs)
   attrs = attrs or {}
@@ -330,6 +351,10 @@ ghost=entity:new({
   button=b.x,
   icon=90,
   phrase_index=1,
+  met=true,
+  finished=false,
+  favorite_book="readme.txt",
+  last_words="good night, good luck, please remember that ☉ will see you on the morrow."
 })
 
 function ghost:interact()
@@ -416,7 +441,7 @@ function door:interact()
   self.return_stage=current_stage
   self.room.door=self
 
-  self.room:fade_to(function()
+  fade_to(function()
     current_stage=self.room
     pl.x=1
     pl.y=current_stage.height-20
@@ -497,13 +522,6 @@ function initialize_actors()
   }
 end
 
-function _init()
- dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=library_entrance
- initialize_actors()
- pl = player:new({x=30,y=20})
-end
-
 fades={
  {1,1,0,0,0,0},
  {2,1,1,0,0,0},
@@ -527,6 +545,11 @@ fade_index=1
 fade_direction=1
 fade_callback=nil
 fade_to=nil
+
+function fade_to(callback)
+  fading=true
+  fade_callback=callback
+end
 
 function fade_update()
   fade_index+=fade_direction
@@ -573,35 +596,6 @@ function wipe:draw()
 end
 
 
-function _update()
-  if fading then
-    fade_update()
-  elseif wiping then
-    wipe:update()
-  else
-   current_stage:update()
-   if (not speaking) pl:update()
-   if (speaking) dialog:update()
-   foreach(current_stage.actors, function(actor)
-     actor:update()
-   end)
- end
-   t+=1
-end
-
-function _draw()
- cls()
- set_camera()
- current_stage:draw()
- foreach(current_stage.actors, function(actor)
-   actor:draw()
- end)
- pl:draw()
- dialog:draw()
- if (fading) fade_palette()
- if (wiping) wipe:draw()
-end
-
 -- "good morning. the day is still young yet, and there are adventures to be had.",
 -->8
 -- characters
@@ -616,6 +610,7 @@ sugar_captain=ghost:new({
   x=80,
   y=70,
   name="sugar captain",
+  favorite_book="red rackham's treasure - herge"
 })
 
 sugar_maestro=ghost:new({
@@ -651,7 +646,8 @@ teacher=ghost:new({
   spr_w=2,
   h=16,
   facing_left=true,
-  name="mrs. finch"
+  name="mrs. finch",
+  favorite_book="piranesi - susanna clarke"
 })
 
 scientist=ghost:new({
@@ -677,6 +673,8 @@ scientist=ghost:new({
   eye_y=27,
   current_frames={236},
   name="dr. vera, phd",
+  favorite_book="the dragons of eden - carl sagan",
+  last_words="i suppose i will have the rest of eternity to learn what ghosts are."
 })
 
 function scientist:draw()
@@ -703,6 +701,7 @@ scaredy_ghost=ghost:new({
   x=54,
   y=32,
   name="clyde",
+  favorite_book="scary stories to tell in the dark - alvin schwartz"
 })
 
 tea_ghost=ghost:new({
@@ -737,6 +736,7 @@ erwin=ghost:new({
   spr_w=2,
   h=12,
   name="erwin",
+  favorite_book="sum: forty tales from the afterlives - david eagleman"
 })
 
 stargazer=ghost:new({
@@ -759,7 +759,8 @@ width=10,
 height=12,
 x=22,
 y=28,
-name="stargazer"
+name="stargazer",
+favorite_book="diaspora - greg egan"
 })
 
 librarian=ghost:new({
@@ -785,7 +786,11 @@ librarian=ghost:new({
   h=16,
   x=25,
   y=48,
-  name="library ann"
+  name="library ann",
+  met=true,
+  finished=true,
+  favorite_book="kalpa imperial: the greatest empire that never was - angelica gorodischer",
+  last_words="they deserve to be remembered."
 })
 
 mourner=ghost:new({
@@ -809,6 +814,7 @@ mourner=ghost:new({
   sy=60,
   name="kathlyn",
   offset=0,
+  favorite_book="all my puny sorrows - miriam toews"
 })
 function mourner:update()
   local new_x=self.sx+30*sin(self.offset/300)
@@ -821,7 +827,7 @@ elder=ghost:new({
   phrases={
     {{
       "after a lifetime you might think you know yourself.",
-      "you've been through the kiln, and your ways are set.",
+      "you've been molded and sculpted and put through the kiln, and your ways are set.",
       "i lived for ninety years. i'm proud of the person i made of myself.",
       "but i'm standing now in front of eternity.",
       "who might i be in another ninety years?",
@@ -868,7 +874,8 @@ ant=ghost:new({
   y=24,
   spr_h=2,
   spr_w=5,
-  name="mae"
+  name="mae",
+  favorite_book="watership down - richard adams"
 })
 
 flower=ghost:new({
@@ -896,7 +903,8 @@ flower=ghost:new({
   spr_h=3,
   spr_w=2,
   h=16,
-  name="chuck"
+  name="chuck",
+  favorite_book="a heap o' livin' - edgar a. guest"
 })
 
 statue=ghost:new({
@@ -929,8 +937,28 @@ statue=ghost:new({
   spr_h=3,
   spr_w=2,
   h=24,
-  name="rosetta"
+  name="rosetta",
+  last_words="appreciate what you've made of yourself. let yourself be remembered.",
+  favorite_book="the mezzanine - nicholson baker"
 })
+
+ghosts={
+ librarian,
+ mourner,
+ elder,
+ ant,
+ flower,
+ statue,
+ stargazer,
+ erwin,
+ tea_ghost,
+ scaredy_ghost,
+ scientist,
+ teacher,
+ sugar_maestro,
+ sugar_captain,
+ -- last ghost
+}
 
 
 -->8
@@ -1031,7 +1059,7 @@ function room:draw()
   map(self.tile_sx,self.tile_sy,0,0,self.tile_w,self.tile_h)
 end
 function room:exit_left()
-  self:fade_to(function()
+  fade_to(function()
     current_stage=self.door.return_stage
     pl.x=self.door.x
     pl.y=68
@@ -1065,6 +1093,185 @@ function library:draw()
   rectfill(8,8,103,63,15)
   rectfill(0,40,8,71,15)
   room.draw(self)
+end
+-->8
+--todo
+
+--create "book" state
+--populate book with blanks
+--create last-word hooks
+
+--create sugar game
+--give teacher a phase 1 phrase
+--add third sugar ghost
+--add trigger to start sugar game
+--add fly mode
+
+--move all ghosts to fountain
+--give ghosts goodbyes
+--script ghost's exit
+
+--figure out an intro!
+
+--add title screen
+
+-->8
+--game state
+
+states = {}
+
+states.game = {}
+
+function states.game:update()
+   current_stage:update()
+   if (not speaking) then
+    pl:update()
+    if (btnp(b.z)) then
+    	fade_to(function()
+     state=states.book
+     end)
+    end
+   end
+   if (speaking) dialog:update()
+   foreach(current_stage.actors, function(actor)
+     actor:update()
+   end)
+ t+=1
+end
+
+function states.game:draw()
+ cls()
+ set_camera()
+ current_stage:draw()
+ foreach(current_stage.actors, function(actor)
+   actor:draw()
+ end)
+ pl:draw()
+ dialog:draw()
+end
+-->8
+--book state
+
+
+book={}
+states.book=book
+
+book.book_rec=dialog:new({x=16,y=56,w=110,h=16})
+book.epitaph=dialog:new({x=16,y=80,w=110,h=32})
+
+function book:update()
+	if (btnp(b.left)) then
+	 self:page_to(max(book.ghost_idx-1, 1))
+	end
+
+	if (btnp(b.right)) then
+	 self:page_to(min(book.ghost_idx+1,#ghosts))
+	end
+
+	if (btnp(b.z)) then
+		fade_to(function()
+	 	state=states.game
+		end)
+	end
+
+
+end
+
+function book:page_to(idx)
+ book.ghost_idx=idx
+ local ghost=ghosts[idx]
+ book.epitaph.message="\""..ghost.last_words.."\""
+ book.epitaph.line_index=0
+ book.epitaph.index=0
+ book.epitaph:rush()
+ book.book_rec.message=ghost.favorite_book
+ book.book_rec.line_index=0
+ book.book_rec.index=0
+ book.book_rec:rush()
+end
+
+function book:draw()
+	cls()
+	rectfill(0,0,255,255,1)
+	rectfill(0,2,124,124, 4)
+	rectfill(0,4,122,122,15)
+	rectfill(0,4,6,122,5)
+	rectfill(8,4,10,122,5)
+	line(13,4,13,122,5)
+
+	local ghost=ghosts[book.ghost_idx]
+	local tmpx=ghost.x
+	local tmpy=ghost.y
+
+	ghost.x=64-(ghost.spr_w*4)
+	ghost.y=32-(ghost.spr_h*4)
+
+	if (not ghost.met) then
+		pal({
+		[6]=1,
+		[7]=1,
+		[13]=1
+		})
+	else
+		pal()
+	end
+
+	ghost:draw()
+
+	ghost.x=tmpx
+	ghost.y=tmpy
+
+	local name="???"
+	if (ghost.met) name=ghost.name
+
+	print(
+	name,
+	64-(#name*2),
+	12,
+	2
+	)
+
+	print("favorite book:",16,50)
+	print(book.book_rec.message)
+
+	print(book.epitaph.message, 16,80)
+
+	print(book.ghost_idx, 64,116)
+	if (book.ghost_idx > 1) then
+		print("⬅️", 105,116)
+	end
+
+	if (book.ghost_idx < #ghosts) then
+		print("➡️", 114,116)
+	end
+end
+-->8
+--builtins
+
+function _init()
+ dialog.message=dialog.phrases[dialog.phrase_index]
+ current_stage=library_entrance
+ initialize_actors()
+ pl = player:new({x=30,y=20})
+ state = states.book
+ book.ghost_idx=1
+end
+
+
+function _draw()
+	state.draw()
+ if (fading) fade_palette()
+ if (wiping) wipe:draw()
+end
+
+function _update()
+ if fading then
+   fade_update()
+ elseif wiping then
+   wipe:update()
+ else
+  state:update()
+ end
 end
 __gfx__
 00eeee00000000000000000000eeee000000000000eeee00333333330000b00000000000000000000000000000000000333f3f3fffffffff0000000000000000
@@ -1232,4 +1439,4 @@ __map__
 18181818181818181818181818181818000000a3000000000000a40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001818181818181818181818181818181818181818181818181818181818181818000000000000000000
 18181818181818181818181818181818000000b1b1b1b1b1b1b1b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001818181818181818181818181818181818181818181818181818181818181818000000000000000000
 __sfx__
-001400001a000160000f0000900005000020002630027300273002730001000020000300004000040000400004000010000100002000020000300003000030000400004000040000700003000070000300003000
+001400000105001050010500105002050020500205002050020500205002050010500105001050010500005000050000500205002050020500205002050010500005000050000500700003000070000300003000

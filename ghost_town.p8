@@ -6,6 +6,7 @@ __lua__
 t=0
 sunset=0
 speaking=false
+has_book=false
 
 b={
   left=0,
@@ -20,6 +21,9 @@ cam={x=0,y=0}
 actors = {}
 
 stage = {tile_sx=0,tile_sy=0,tile_w=16,tile_h=16,actors={},palette_swaps={}}
+
+sugars={}
+
 
 function stage:new(attrs)
   attrs=attrs or {}
@@ -128,8 +132,12 @@ end
 
 function dialog:update()
  if self.index <#self.message then
-  self.index+=1
-  self:insert_newlines()
+  if btnp(b.x) and self.index>1 then
+   self:rush()
+  else
+   self.index+=1
+   self:insert_newlines()
+  end
  else
   self.wait=true
   if btnp(b.x) then
@@ -220,7 +228,7 @@ entity.update = function(self)
   self.dy*=self.damping
 end
 
-player = entity:new({
+player=entity:new({
   jumping=false,
   grounded=true,
   damping=1,
@@ -236,6 +244,7 @@ player = entity:new({
     downjump={4},
   },
   icon_offset=1,
+  sugars={}
 })
 
 function player:update()
@@ -257,7 +266,7 @@ end
 
 function player:collide_and_move()
   self.dx*=self.damping
-  self.dy+=self.gravity
+  self.dy+=self.gravity*((100-#self.sugars)/100)
 
   --collide left
   if is_solid(self.x+self.dx,self.y+self.h) or
@@ -296,7 +305,7 @@ function player:process_buttons()
 
   if btn(b.up) and not self.jumping then
     self.jumping=true
-    self.dy=-2
+    self.dy=-2-#self.sugars/10
   end
 
   local other = colliding_actor()
@@ -351,7 +360,7 @@ ghost=entity:new({
   button=b.x,
   icon=90,
   phrase_index=1,
-  met=true,
+  met=false,
   finished=false,
   favorite_book="readme.txt",
   last_words="good night, good luck, please remember that ☉ will see you on the morrow."
@@ -385,6 +394,10 @@ function ghost:vanish_to(stage)
     del(current_stage.actors,self)
     add(stage.actors,self)
   end)
+end
+
+function ghost:add_entry()
+	self.finished=true
 end
 
 function ghost:blink(callback)
@@ -468,6 +481,7 @@ function initialize_actors()
   schoolhouse_entrance.actors={
     sugar_captain,
     sugar_maestro,
+    sugar_magistrate,
     door:new({x=48,y=56,w=16,h=24,room=schoolhouse})
   }
   schoolhouse.actors={
@@ -622,6 +636,33 @@ sugar_maestro=ghost:new({
   y=70,
   name="sugar maestro"
 })
+
+sugar_magistrate=ghost:new({
+ phrases={
+  {{
+
+  }}
+ },
+ current_frames={79},
+ x=30,y=20,
+ name="sugar magistrate",
+ sx=64,
+ sy=20,
+ offset=0
+})
+
+function sugar_magistrate:update()
+ ghost.update(self)
+ local new_x=self.sx+30*sin(self.offset/300)
+ self.facing_left=new_x<self.x
+ self.x=new_x
+ self.y=self.sy+10*sin(self.offset/500)
+ self.offset+=1
+
+ if t%30==0 then
+  add_sugar(self.x, self.y)
+ end
+end
 
 teacher=ghost:new({
   phrases={
@@ -778,7 +819,11 @@ librarian=ghost:new({
         "take the notebook with you when you're done, as a memento of what we used to be.",
         "they deserve to be rememembered."
       },
-      function(self) self:vanish_to(fountain) end
+      function(self)
+       has_book=true
+       self:add_entry()
+       self:vanish_to(fountain)
+      end
     },
   },
   current_frames={192},
@@ -787,8 +832,6 @@ librarian=ghost:new({
   x=25,
   y=48,
   name="library ann",
-  met=true,
-  finished=true,
   favorite_book="kalpa imperial: the greatest empire that never was - angelica gorodischer",
   last_words="they deserve to be remembered."
 })
@@ -807,7 +850,7 @@ mourner=ghost:new({
   "what kind of loser ghost haunts a graveyard by herself?",
   ". . .",
   "i just want my nanna back."
-}}
+}, function(self) self:add_entry() end}
   },
   current_frames={197},
   sx=64,
@@ -957,6 +1000,7 @@ ghosts={
  teacher,
  sugar_maestro,
  sugar_captain,
+ sugar_magistrate
  -- last ghost
 }
 
@@ -1097,8 +1141,6 @@ end
 -->8
 --todo
 
---create "book" state
---populate book with blanks
 --create last-word hooks
 
 --create sugar game
@@ -1114,6 +1156,7 @@ end
 --figure out an intro!
 
 --add title screen
+--add voices maybe
 
 -->8
 --game state
@@ -1126,7 +1169,8 @@ function states.game:update()
    current_stage:update()
    if (not speaking) then
     pl:update()
-    if (btnp(b.z)) then
+    if (btnp(b.z) and has_book) then
+     book:page_to(book.ghost_idx)
     	fade_to(function()
      state=states.book
      end)
@@ -1136,6 +1180,9 @@ function states.game:update()
    foreach(current_stage.actors, function(actor)
      actor:update()
    end)
+
+   foreach(sugars, sugar.update)
+   foreach(pl.sugars, sugar.update)
  t+=1
 end
 
@@ -1146,7 +1193,11 @@ function states.game:draw()
  foreach(current_stage.actors, function(actor)
    actor:draw()
  end)
+
  pl:draw()
+ foreach(sugars, sugar.draw)
+ foreach(pl.sugars, sugar.draw)
+
  dialog:draw()
 end
 -->8
@@ -1231,10 +1282,11 @@ function book:draw()
 	2
 	)
 
-	print("favorite book:",16,50)
-	print(book.book_rec.message)
-
-	print(book.epitaph.message, 16,80)
+ if ghost.finished then
+ 	print("favorite book:",16,50)
+	 print(book.book_rec.message)
+		print(book.epitaph.message, 16,80)
+ end
 
 	print(book.ghost_idx, 64,116)
 	if (book.ghost_idx > 1) then
@@ -1250,10 +1302,10 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=library_entrance
+ current_stage=schoolhouse_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
- state = states.book
+ state = states.game
  book.ghost_idx=1
 end
 
@@ -1273,6 +1325,90 @@ function _update()
   state:update()
  end
 end
+-->8
+--sugar mode
+
+sugar=entity:new({
+ x=0,
+ y=0,
+ w=0,
+ h=0,
+ dx=0,
+ dy=0,
+ moon=nil,
+ gravity=0.1
+})
+
+function sugar:draw()
+ pset(self.x,self.y,7)
+end
+
+function sugar:update()
+ if self.moon then
+  local v=lerp_points(self,self.moon,.06)
+  self.ax=v.x-self.x
+  self.ay=v.y-self.y
+
+  local xwiggle=(rnd(2)-1)
+  local ywiggle=(rnd(2)-1)
+
+  self.dx+=self.ax
+  self.dy+=self.ay
+  self.dx*=0.9
+  self.dy*=0.9
+
+  if t%5==self.id%5 then
+  self.dx+=xwiggle
+  self.dy+=ywiggle
+  end
+ else
+   self.dy+=self.gravity
+ end
+ self.x+=self.dx
+ self.y+=self.dy
+
+ if (self.y>128) del(sugars,self)
+ if (#sugars > 50) del(sugars,sugars[1])
+ if (#pl.sugars > 50) del(pl.sugars,pl.sugars[1])
+ if dist(self, pl) < 5 and not self.moon then
+  add(pl.sugars, self)
+  del(sugars, self)
+  self.moon=pl
+  self.dy=0
+ end
+end
+
+function add_sugar(x,y)
+	add(
+	sugars,
+	sugar:new({x=x,y=y,id=#sugars})
+	)
+end
+
+-- distance between the center
+-- of two entities
+function dist(a,b)
+	local x=(a.x+a.w/2)-(b.x+b.w/2)
+	local y=(a.y+a.h/2)-(b.y+b.h/2)
+
+ return sqrt(x*x+y*y)
+end
+
+function lerp(a,b,weight)
+	return (1-weight)*a+weight*b
+end
+
+function lerp_points(a,b,weight)
+ printh("w: "..a.w, "@clip")
+ return {
+ 	x=lerp(a.x+(a.w/2),b.x+(b.w/2),weight),
+ 	y=lerp(a.y+(a.h/2),b.y+(b.h/2),weight)
+  -- x=lerp(a.x,b.x+3,weight),
+  -- y=lerp(a.y,b.y+5.5,weight)
+
+ }
+end
+
 __gfx__
 00eeee00000000000000000000eeee000000000000eeee00333333330000b00000000000000000000000000000000000333f3f3fffffffff0000000000000000
 0eeee4e000eeee0000eeee000eeee4e0e0eeee000eeeeee03333333300b0b0b000000000000000000000000000000000f3f333f3ffffffff0000000000000000

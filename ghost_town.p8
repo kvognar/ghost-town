@@ -24,6 +24,11 @@ stage = {tile_sx=0,tile_sy=0,tile_w=16,tile_h=16,actors={},palette_swaps={}}
 
 sugars={}
 
+function normalize(x,y)
+ local length=sqrt(x^2+y^2)
+ if (length==0) return nil
+ return {x=x/length,y=y/length}
+end
 
 function stage:new(attrs)
   attrs=attrs or {}
@@ -46,6 +51,36 @@ function stage:exit_left()
     current_stage=current_stage.left()
     pl.x=current_stage.width-pl.w
   end)
+end
+
+function stage:exit_up()
+  wipe:init(-1, function()
+   current_stage=current_stage.up()
+   pl.x=64
+   pl.y=40
+   pl.can_fly=true
+   pl.flying=true
+   pl.dy=0
+   pl.dx=0
+   sugar_magistrate:interact()
+
+   schoolhouse_entrance.actors={}
+   foreach(sugar_crew, function(crewmate)
+    del(schoolhouse_entrance.actors,crewmate)
+    add(the_sky.actors,crewmate)
+    crewmate.damping=0.95
+    crewmate.flying=true
+   end
+   )
+   sugar_magistrate.x=80
+   sugar_magistrate.y=40
+   sugar_captain.x=32
+   sugar_captain.y=40
+   sugar_maestro.x=64
+   sugar_maestro.y=60
+   sugar_magistrate.dispense=false
+
+  end,true)
 end
 
 function stage:draw()
@@ -198,7 +233,7 @@ function dialog:init(phrases,speaker,callback)
 end
 
 entity = {
- x=0,y=0,dx=0,dy=0,
+ x=0,y=0,dx=0,dy=0,ax=0,ay=0,
  damping=1,
  w=5,h=8,
  spr_w=1,spr_h=1,
@@ -215,17 +250,58 @@ end
 
 function entity:draw()
   if self.current_frames and #self.current_frames > 0 then
-    spr(self.current_frames[self.frame_index],self.x,self.y,self.spr_w,self.spr_h,self.facing_left)
+   local y_offset=0
+   if (self.flying and t%60<30) y_offset=-1
+    spr(
+    self.current_frames[self.frame_index],
+    self.x,
+    self.y+y_offset,
+    self.spr_w,
+    self.spr_h,
+    self.facing_left
+   )
   else
     -- rectfill(self.x,self.y,self.x+self.w,self.y+self.h,8)
   end
 end
 
-entity.update = function(self)
-  self.x+=self.dx
-  self.y+=self.dy
-  self.dx*=self.damping
-  self.dy*=self.damping
+function entity:lerp_to(other, weight)
+ v=lerp_points(self,other,weight)
+ self.ax=v.x-self.x
+ self.ay=v.y-self.y
+end
+
+function entity:aim_for(other)
+ self.ax=other.x-self.x
+ self.ay=other.y-self.y
+end
+
+-- "I'm outta here"
+-- If you're going to lerp, do this one to
+-- bounce in the other direction first
+function entity:bounce()
+ self:aim_for(self.target_point)
+ local norms=normalize(self.ax,self.ay)
+ self.dx+=norms.x*-4
+ self.dy+=norms.y*-4
+
+end
+
+function entity:update()
+ local a_norm=normalize(self.ax,self.ay)
+
+ if a_norm then
+  self.ax=a_norm.x*.5
+  self.ay=a_norm.y*.5
+ end
+
+ self.dx+=self.ax
+ self.dy+=self.ay
+
+ self.x+=self.dx
+ self.y+=self.dy
+ self.dx*=self.damping
+ self.dy*=self.damping
 end
 
 player=entity:new({
@@ -266,7 +342,9 @@ end
 
 function player:collide_and_move()
   self.dx*=self.damping
-  self.dy+=self.gravity*((100-#self.sugars)/100)
+  if not self.flying then
+   self.dy+=self.gravity*((100-#self.sugars)/100)
+  end
 
   --collide left
   if is_solid(self.x+self.dx,self.y+self.h) or
@@ -288,6 +366,7 @@ function player:collide_and_move()
      is_solid(self.x+self.w,self.y+self.h+self.dy)
   then
     self.jumping=false
+    self.flying=false
     self.dy=0
   end
   self.y+=self.dy
@@ -295,18 +374,52 @@ function player:collide_and_move()
 end
 
 function player:process_buttons()
-  if btn(b.left) then
-    self.dx=-1
-  elseif btn(b.right) then
-    self.dx=1
+
+  if self.flying then
+   self.dy*=0.90
+   self.dx*=0.90
+   if btn(b.up) then
+    self.dy-=.3
+   elseif btn(b.down) then
+    self.dy+=.3
+   end
+   self.dy=mid(-2,self.dy,2)
+
+   if btn(b.left) then
+    self.dx-=.4
+   elseif btn(b.right) then
+    self.dx+=.4
+   end
+   self.dx=mid(-2,self.dx,2)
+
   else
-    self.dx=0
+   if btn(b.left) then
+     self.dx=-1
+   elseif btn(b.right) then
+     self.dx=1
+   else
+     self.dx=0
+   end
   end
 
-  if btn(b.up) and not self.jumping then
-    self.jumping=true
-    self.dy=-2-#self.sugars/10
+  if self.can_fly then
+   if btn(b.up) then
+    self.flying=true
+   end
+  else
+   if btn(b.up) and not self.jumping then
+     self.jumping=true
+     self.dy=-2-#self.sugars/10
+     self.dy=-10
+   end
+
   end
+
+  -- if btn(b.up) and not self.jumping then
+  --   self.jumping=true
+  --   self.dy=-2-#self.sugars/10
+  --   self.dy=-10
+  -- end
 
   local other = colliding_actor()
   if other and btnp(other.button) then
@@ -321,7 +434,7 @@ function player:select_frames()
   else
     self.current_frames=self.frames.standing
   end
-  if self.jumping then
+  if self.jumping or self.flying then
     if self.dy <0 then
       self.current_frames=self.frames.upjump
     else
@@ -350,6 +463,13 @@ function player:check_boundaries()
     else
       self.dx=0
     end
+
+  elseif self.y+self.h<1 then
+   if current_stage.up then
+    current_stage.exit_up()
+   else
+    self.dy=max(0,self.dy)
+   end
   end
 end
 
@@ -383,6 +503,11 @@ function ghost:update()
       self:blink_callback()
     end
   end
+  if self.target_point then
+   self:aim_for(self.target_point)
+
+  end
+  entity.update(self)
 end
 
 function ghost:increment_phrase()
@@ -409,6 +534,9 @@ end
 function ghost:draw()
   if (self.blinking and t%2==0) return
   entity.draw(self)
+  if (self.target_point) then
+   circfill(self.target_point.x,self.target_point.y,4,0)
+  end
 end
 
 
@@ -584,10 +712,11 @@ function fade_palette()
   end
 end
 
-wipe={x=0,dx=0,callback=nil,}
-function wipe:init(dir,callback)
+wipe={x=0,dx=0,callback=nil,vertical=false}
+function wipe:init(dir,callback,vertical)
   wiping=true
   self.callback=callback
+  self.vertical=vertical
   self.x=-200*dir
   self.dx=15*dir
 end
@@ -606,7 +735,11 @@ function wipe:update()
 end
 
 function wipe:draw()
+ if self.vertical then
+  rectfill(0,wipe.x,127,wipe.x+200,0)
+ else
   rectfill(wipe.x,0,wipe.x+200,127,0)
+	end
 end
 
 
@@ -637,30 +770,56 @@ sugar_maestro=ghost:new({
   name="sugar maestro"
 })
 
-sugar_magistrate=ghost:new({
- phrases={
-  {{
+function exit_sugar_crew()
+ foreach(sugar_crew, function(crewmate)
+  crewmate.target_point={x=64,y=-32,w=0,h=0}
+  crewmate:bounce()
+ end)
+end
 
-  }}
+
+sugar_magistrate=ghost:new({
+
+ phrases={
+  {
+   {
+    'you did it!',
+    'see? flying is easy.',
+    'you wanna know a secret?',
+    "i didn't give you any sugar.",
+    "that was just regular ghost stuff.",
+    'the real sugar was in you all along!',
+    'i can smell the frosty flakes on your breath.',
+    'okay bye!'
+   },
+   exit_sugar_crew
+  },
  },
+
+
  current_frames={79},
  x=30,y=20,
  name="sugar magistrate",
  sx=64,
- sy=20,
- offset=0
+ sy=60,
+ offset=0,
+ dispense=false
 })
+
+sugar_crew={sugar_maestro, sugar_captain,sugar_magistrate}
+
 
 function sugar_magistrate:update()
  ghost.update(self)
- local new_x=self.sx+30*sin(self.offset/300)
- self.facing_left=new_x<self.x
- self.x=new_x
- self.y=self.sy+10*sin(self.offset/500)
- self.offset+=1
-
- if t%30==0 then
-  add_sugar(self.x, self.y)
+ if (self.dispense) then
+  local new_x=self.sx+30*sin(self.offset/300)
+  self.facing_left=new_x<self.x
+  self.x=new_x
+  self.y=self.sy+2*sin(self.offset/500)-(2*#pl.sugars)
+  self.offset+=1
+  if t%60==0 and #sugars<5 then
+   add_sugar(self.x, self.y)
+  end
  end
 end
 
@@ -1027,6 +1186,19 @@ end
 function schoolhouse_entrance:right()
   return blueberry_lane
 end
+function schoolhouse_entrance:up()
+ return the_sky
+end
+
+the_sky=stage:new({
+ tile_w=16
+})
+function the_sky:draw()
+ self:draw_sky()
+end
+function the_sky:down()
+  return schoolhouse_entrance
+end
 
 blueberry_lane=stage:new({
   tile_sx=32,tile_sy=0,tile_w=33,
@@ -1345,9 +1517,7 @@ end
 
 function sugar:update()
  if self.moon then
-  local v=lerp_points(self,self.moon,.06)
-  self.ax=v.x-self.x
-  self.ay=v.y-self.y
+  self:lerp_to(self.moon,0.06)
 
   local xwiggle=(rnd(2)-1)
   local ywiggle=(rnd(2)-1)
@@ -1370,18 +1540,24 @@ function sugar:update()
  if (self.y>128) del(sugars,self)
  if (#sugars > 50) del(sugars,sugars[1])
  if (#pl.sugars > 50) del(pl.sugars,pl.sugars[1])
- if dist(self, pl) < 5 and not self.moon then
+ if dist(self, pl) < 8 and not (self.moon==pl) then
   add(pl.sugars, self)
   del(sugars, self)
   self.moon=pl
   self.dy=0
+  sfx(4,-1,
+  ((#pl.sugars-1)%8)*2
+  ,2)
+  sfx(5,-1,
+  ((#pl.sugars-1)%8)*2
+  ,2)
  end
 end
 
 function add_sugar(x,y)
 	add(
 	sugars,
-	sugar:new({x=x,y=y,id=#sugars})
+	sugar:new({x=x,y=y,id=#sugars,moon={x=x,y=y,w=0,h=0}})
 	)
 end
 
@@ -1394,18 +1570,16 @@ function dist(a,b)
  return sqrt(x*x+y*y)
 end
 
+--turns out this isn't being used
+--properly but I'm gonna leave it
 function lerp(a,b,weight)
 	return (1-weight)*a+weight*b
 end
 
 function lerp_points(a,b,weight)
- printh("w: "..a.w, "@clip")
  return {
  	x=lerp(a.x+(a.w/2),b.x+(b.w/2),weight),
  	y=lerp(a.y+(a.h/2),b.y+(b.h/2),weight)
-  -- x=lerp(a.x,b.x+3,weight),
-  -- y=lerp(a.y,b.y+5.5,weight)
-
  }
 end
 
@@ -1575,4 +1749,12 @@ __map__
 18181818181818181818181818181818000000a3000000000000a40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001818181818181818181818181818181818181818181818181818181818181818000000000000000000
 18181818181818181818181818181818000000b1b1b1b1b1b1b1b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001818181818181818181818181818181818181818181818181818181818181818000000000000000000
 __sfx__
-001400000105001050010500105002050020500205002050020500205002050010500105001050010500005000050000500205002050020500205002050010500005000050000500700003000070000300003000
+010600001c5501f5501c550205501c550215501c550225501c550235501c550255501c55026550015000050000500005000250002500025000250002500015000050000500005000750003500075000350003500
+01060000285502c550285502d550285502e550285502f550285503155028550335502855034550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010600000c750187500c7501a7500c7501c7500c7501d7500c7501f7500c750217500c750237500c7502475000700007000070000700007000070000700007000070000700007000070000700007000070000700
+010600001875024750187502675018750287501875029750187502b750187502d750187502f750187503075000700007000070000700007000070000700007000070000700007000070000700007000070000700
+00060000187501c7501a7501d7501c7501f7501d750217501f7502375021750247502375026750247502875024750287502675029750287502b750297502d7502b7502f7502d750307502f750327503075034750
+0106000024750287502675029750287502b750297502d7502b7502f7502d750307502f75032750307503475000700007000070000700007000070000700007000070000700007000070000700007000070000700
+__music__
+00 05424344
+04 04424344

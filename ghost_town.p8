@@ -65,11 +65,11 @@ function stage:exit_up()
    pl.flying=true
    pl.dy=0
    pl.dx=0
+   sugar_mode=false
    sugar_magistrate.drift=false
    sugar_magistrate.dispense=false
    sugar_magistrate:interact()
 
-   schoolhouse_entrance.actors={}
    foreach(sugar_crew, function(crewmate)
     del(schoolhouse_entrance.actors,crewmate)
     add(the_sky.actors,crewmate)
@@ -84,7 +84,7 @@ function stage:exit_up()
    sugar_maestro.x=64
    sugar_maestro.y=60
    sugar_magistrate.dispense=false
-
+   sugars={}
   end,true)
 end
 
@@ -179,12 +179,17 @@ function dialog:draw_speaker()
   print(self.speaker.name, self.x+4,self.y-5,13)
 end
 
+silent={' ','.',',','?','!'}
+
+
+
 function dialog:update()
  if self.index <#self.message then
   if btnp(b.x) and self.index>1 then
    self:rush()
   else
    self.index+=1
+    self.speaker:vocalize()
    self:insert_newlines()
   end
  else
@@ -203,8 +208,8 @@ function dialog:advance()
   self.index=0
   self.line_index=0
  else
+   speaking=false
    if (self.callback) self.callback(self.speaker)
-  speaking=false
  end
 end
 
@@ -424,6 +429,7 @@ function player:process_buttons()
    if btn(b.up) and not self.jumping then
      self.jumping=true
      self.dy=-2-#self.sugars/10
+     -- self.dy=-3-#self.sugars--/10
      --self.dy=-10
    end
 
@@ -496,6 +502,9 @@ ghost=entity:new({
   can_flip=true,
   interactable=true,
   favorite_book="readme.txt",
+  voice_clip=6,
+  voice_start=0,
+  voice_length=2,
   last_words="good night, good luck, please remember that ☉ will see you on the morrow."
 })
 
@@ -554,14 +563,26 @@ function ghost:blink(callback)
 end
 
 function ghost:draw()
-  if (self.blinking and t%2==0) return
+  if (not state==states.book)
+  and (self.blinking and t%2==0)
+  then
+   return
+  end
   entity.draw(self)
   if (self.target_point) then
    circfill(self.target_point.x,self.target_point.y,4,0)
   end
 end
 
-
+function ghost:vocalize()
+	if (t%5~=0) return
+	sfx(self.voice_clip,
+   	-1,
+   	self.voice_start,
+   	2,
+   	self.voice_length
+   )
+end
 
 function is_solid(x,y)
   return fget(get_tile(x,y)) == 1
@@ -730,6 +751,7 @@ function fade_update()
   if fade_index == #fades[1] then
     fade_callback(fade_to)
     fade_direction*=-1
+    center_sugars()
   end
   if fade_index == 1 then
     fading=false
@@ -763,6 +785,7 @@ function wipe:update()
     function(actor)
     	actor:update()
     end)
+   	center_sugars()
   end
 
   if self.x>200 or self.x<-200 then
@@ -787,31 +810,61 @@ end
 
 sugar_captain=ghost:new({
   phrases={
-    {{"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like eucalyptus sap and honeydew!"}}
+    {{"did you know that sugar gliders are exuda-tivorous?", "that means they eat plant goo like eucalyptus sap and honeydew!"}},
+    {
+     {
+      'the sugar was inside you all along!'
+     },
+     function() sugar_maestro:interact() end
+    }
   },
   current_frames={78},
   x=100,
   y=65,
   flying=true,
   name="sugar captain",
+  voice_clip=7,
+  voice_start=6,
   favorite_book="red rackham's treasure - herge"
 })
 
 sugar_maestro=ghost:new({
   phrases={
-{{    "shh, i'm in torpor.", "that's like a nap, but more nappier."
-}}  },
+   {{"shh, i'm in torpor.", "that's like a nap, but more nappier."}},
+   {
+    {
+    "i can smell the frosty flakes on your breath.",
+    },
+    function()
+     sugar_magistrate:increment_phrase()
+     sugar_magistrate:interact()
+    end
+  }
+  },
   current_frames={77},
   x=10,
   y=70,
+  voice_clip=7,
+  voice_start=10,
   name="sugar maestro"
 })
+
+function sugar_maestro:update()
+ ghost.update(self)
+ if sugar_mode then
+ 	self:face_toward(pl.x)
+ 	self.y=max(1,sugar_magistrate.y)
+ end
+end
+
+function sugar_captain:update()
+	sugar_maestro.update(self)
+end
 
 function begin_sugar_lesson()
  foreach(sugar_crew, function(crewmate)
  	crewmate:increment_phrase()
  	crewmate.flying=true
- 	--crewmate.interactable=false
  end)
 	sugar_magistrate.dispense=true
 	sugar_mode=true
@@ -825,8 +878,13 @@ function exit_sugar_crew()
  end)
  set_timeout(90,function()
  	current_stage:exit_down()
- 	sugar_mode=false
+ 	pl.sugars={
+ 		pl.sugars[1],
+ 		pl.sugars[2],
+ 		pl.sugars[3]
+ 	}
  end)
+ teacher:increment_phrase()
 end
 
 
@@ -853,12 +911,15 @@ sugar_magistrate=ghost:new({
     'you wanna know a secret?',
     "i didn't give you any sugar.",
     "that was just regular ghost stuff.",
-    'the real sugar was in you all along!',
-    'i can smell the frosty flakes on your breath.',
+   },
+   function() sugar_captain:interact() end
+  },
+  {
+   {
     'okay bye!'
    },
    exit_sugar_crew
-  },
+  }
  },
 
 
@@ -870,11 +931,13 @@ sugar_magistrate=ghost:new({
  offset=0,
  dispense=false,
  drift=true,
+ voice_start=8,
+ voice_clip=7,
  sy_m=8
 })
 
 sugar_crew={
-	sugar_maestro, 
+	sugar_maestro,
 	sugar_captain,
 	sugar_magistrate
 }
@@ -1199,6 +1262,7 @@ flower=ghost:new({
   h=16,
   name="chuck",
   can_flip=false,
+  voice_start=4,
   favorite_book="a heap o' livin' - edgar a. guest"
 })
 
@@ -1408,11 +1472,6 @@ end
 
 --add last-word hooks
 
---create sugar game
---give teacher a phase 1 phrase
---add third sugar ghost
---add trigger to start sugar game
---add fly mode
 --fix upward collision
 
 --move all ghosts to fountain
@@ -1620,7 +1679,9 @@ sugar=entity:new({
 })
 
 function sugar:draw()
- pset(self.x,self.y,7)
+ if sugar_mode or pl.flying then
+ 	pset(self.x,self.y,7)
+ end
 end
 
 function sugar:update()
@@ -1696,6 +1757,12 @@ function set_timeout(frames,callback)
  timeout_fn=callback
 end
 
+function center_sugars()
+ foreach(pl.sugars, function(sugar)
+		sugar.x=pl.x
+		sugar.y=pl.y
+ end)
+end
 __gfx__
 00eeee00000000000000000000eeee000000000000eeee00333333330000b00000000000000000000000000000000000333f3f3fffffffff0000000000000000
 0eeee4e000eeee0000eeee000eeee4e0e0eeee000eeeeee03333333300b0b0b000000000000000000000000000000000f3f333f3ffffffff0000000000000000
@@ -1868,6 +1935,8 @@ __sfx__
 010600001875024750187502675018750287501875029750187502b750187502d750187502f750187503075000700007000070000700007000070000700007000070000700007000070000700007000070000700
 00060000187501c7501a7501d7501c7501f7501d750217501f7502375021750247502375026750247502875024750287502675029750287502b750297502d7502b7502f7502d750307502f750327503075034750
 0106000024750287502675029750287502b750297502d7502b7502f7502d750307502f75032750307503475000700007000070000700007000070000700007000070000700007000070000700007000070000700
+000a0000297202a7202f72030720007200172024720257203072033720187301a7300070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700
+010c000018720197201a7201b7501c7501d7501e7501f750207502175022750237502475024750007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700
 __music__
 00 05424344
 04 04424344

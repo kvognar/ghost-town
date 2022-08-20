@@ -504,7 +504,7 @@ ghost=entity:new({
   favorite_book="readme.txt",
   voice_clip=6,
   voice_start=0,
-  voice_length=2,
+  voice_length=3,
   last_words="good night, good luck, please remember that ☉ will see you on the morrow."
 })
 
@@ -546,9 +546,10 @@ function ghost:increment_phrase()
 end
 
 function ghost:vanish_to(stage)
+ self:add_entry()
   self:blink(function(self)
     del(current_stage.actors,self)
-    add(stage.actors,self)
+    -- add(stage.actors,self)
   end)
 end
 
@@ -575,12 +576,15 @@ function ghost:draw()
 end
 
 function ghost:vocalize()
-	if (t%5~=0) return
+	if (t%4~=0) return
+	local num = self.voice_start+
+		flr(rnd(self.voice_length))
+
 	sfx(self.voice_clip,
    	-1,
-   	self.voice_start,
-   	2,
-   	self.voice_length
+   	num,--self.voice_start+num,
+   	1
+   	--self.voice_length
    )
 end
 
@@ -683,6 +687,9 @@ function initialize_actors()
   }
   blueberry_lane_3.actors={
     erwin,
+  }
+  blueberry_lane_4.actors={
+   sleepy,
   }
 
 
@@ -824,8 +831,10 @@ sugar_captain=ghost:new({
   flying=true,
   name="sugar captain",
   voice_clip=7,
-  voice_start=6,
-  favorite_book="red rackham's treasure - herge"
+  voice_start=16,
+  voice_length=3,
+  favorite_book="red rackham's treasure - herge",
+  last_words="sugar gliders are basically vampires but for trees."
 })
 
 sugar_maestro=ghost:new({
@@ -845,8 +854,11 @@ sugar_maestro=ghost:new({
   x=10,
   y=70,
   voice_clip=7,
-  voice_start=10,
-  name="sugar maestro"
+  voice_start=14,
+  voice_length=3,
+  name="sugar maestro",
+  favorite_book="the tea dragon society - kay o'neill",
+  last_words="when i'm bigger, i'll fly you around in my pocket."
 })
 
 function sugar_maestro:update()
@@ -874,6 +886,7 @@ function exit_sugar_crew()
  foreach(sugar_crew, function(crewmate)
   crewmate.target_point={x=64,y=-32,w=0,h=0}
   crewmate:bounce()
+  crewmate:add_entry()
   sfx(3)
  end)
  set_timeout(90,function()
@@ -897,9 +910,9 @@ sugar_magistrate=ghost:new({
  			"you wanna learn how? it's easy, watch!",
  			"you just gotta be like a sugar glider.",
  			"fly with the power of sugar!",
- 			"i'll give you some sugar, ok?",
+ 			"i'll give you some sugar, okay?",
  			"the more you get, the higher you can fly.",
- 			"ok, let's go!"
+ 			"okay, let's go!"
  		},
  		begin_sugar_lesson
  	},
@@ -931,9 +944,12 @@ sugar_magistrate=ghost:new({
  offset=0,
  dispense=false,
  drift=true,
- voice_start=8,
  voice_clip=7,
- sy_m=8
+ voice_start=12,
+ voice_length=3,
+ sy_m=8,
+ favorite_book="falling up - shel silverstein",
+ last_words="see? you can do anything if you just believe you can."
 })
 
 sugar_crew={
@@ -973,20 +989,27 @@ teacher=ghost:new({
   	end
   },
 
-{{    "thanks for being so patient with the kids.",
-    "we were learning about marsupials the day we died.",
-    "they love sugar gliders like i loved armadillos back then.",
-    "i don't curl up and roll around the yard like i used to, though.",
-    "you know, you grow up and you get to know the world, you learn about math and art and weird bugs...",
-    "and then you get used to it.",
-    "snowflakes are still pretty. poe is still gloomy. fennec foxes are still adorable.",
-    "but nothing really hits you the way it did when you were a kid.",
-    "when i teach my students about sugar gliders or photosynthesis or shel silverstein, though...",
-    "i get to be amazed with them all over again.",
-    "now we're dead, and it looks like lessons are over.",
-    "but this afterlife business is a new experience. whatever comes next, we'll all be learning together.",
-    "my students will be brilliant ghosts, i'm sure of it."
-}}  },
+{{
+ "thanks for being so patient with the kids.",
+ "we were learning about marsupials the day we died.",
+ "they're crazy about sugar gliders like i used to be about armadillos.",
+ "i don't curl up and roll around the yard anymore, though.",
+ "you know, you grow up and you get to know the world, you learn about math and art and weird bugs,",
+ "and it's beautiful and incredible and there's so much to see...",
+ "and then you get used to it.",
+ "snowflakes are still pretty. poe is still gloomy. fennec foxes are still adorable.",
+ "but nothing really hits you the way it did when you were a kid.",
+ "when i teach my students about sugar gliders or photosynthesis or shel silverstein, though...",
+ "i get to be amazed with them all over again.",
+ "now we're dead, and it looks like lessons are over.",
+ "but this afterlife business is a new experience. whatever comes next, we'll all be learning together.",
+ "my students will be brilliant ghosts, i'm sure of it."
+}, function(self)
+ self:vanish_to(fountain)
+end
+}
+
+},
   current_frames={195},
   x=70,
   y=48,
@@ -994,24 +1017,30 @@ teacher=ghost:new({
   spr_w=2,
   h=16,
   facing_left=true,
-  name="mrs. finch",
-  favorite_book="piranesi - susanna clarke"
+  name="mrs. lovegarden",
+  favorite_book="piranesi - susanna clarke",
+  last_words="perk up those ears. there's something new for us to learn today."
 })
 
 scientist=ghost:new({
   phrases={
-{{    "so here's something to consider about ghosthood:",
-    'i have no body. my "eye" has no lens to refract light, and no retina to absorb it.',
-    "and yet i can see you all the same.",
-    "in my time as a ghost, i have learned that my perception is limited only by my attention.",
-    "if i focus, i can see radio waves, infrared light, and the occasional cosmic ray.",
-    "i can watch as electrons are stripped from glucose molecules and harnessed for muscle contraction.",
-    "sodium ion cascades in your neurons are as clear to me as waves on the ocean.",
-    "\141 i can see your blood flow \141 \141 i can see your cells grow \141",
-    "the mechanics of your body are a symphony - one that i used to play in as well.",
-    "what a shame that, now that i can see how our bodies worked, it no longer means anything to me.",
-    "i suppose i will have the rest of eternity to learn what ghosts are."
-}}  },
+{{
+ "so here's something to consider about ghosthood:",
+ 'i have no body. my "eye" has no lens to refract light, and no retina to absorb it.',
+ "and yet i can see you all the same.",
+ "in my time as a ghost, i have learned that my perception is limited only by my attention.",
+ "if i focus, i can see radio waves, infrared light, and the occasional cosmic ray.",
+ "i can watch as electrons are stripped from glucose molecules and harnessed for muscle contraction.",
+ "sodium ion cascades in your neurons are as clear to me as waves on the ocean.",
+ "\141 i can see your blood flow \141 \141 i can see your cells grow \141",
+ "the mechanics of your body are a symphony - one that i used to play in as well.",
+ "what a shame that, now that i can see how our bodies worked, it no longer means anything to me.",
+ "i suppose i will have the rest of eternity to learn what ghosts are."
+}, function(self)
+ self:vanish_to(fountain)
+end
+}
+},
   x=30,
   y=24,
   spr_h=2,
@@ -1021,6 +1050,9 @@ scientist=ghost:new({
   eye_y=27,
   current_frames={236},
   name="dr. vera, phd",
+  voice_clip=7,
+  voice_start=0,
+  voice_length=4,
   can_flip=false,
   favorite_book="the dragons of eden - carl sagan",
   last_words="i suppose i will have the rest of eternity to learn what ghosts are."
@@ -1042,26 +1074,41 @@ end
 
 scaredy_ghost=ghost:new({
   phrases={
-    {{"th... there are ghosts all over this town! don't you see them?",
-    "run! run for your life!"
-  }}
+    {
+     {"th... there are ghosts all over this town! don't you see them?",
+    "run! run for your life!"},
+    function(self)
+     self:vanish_to(fountain)
+     tea_ghost.phrase_index=2
+
+    end
+ }
   },
   current_frames={241},
   x=54,
   y=32,
   name="clyde",
-  favorite_book="scary stories to tell in the dark - alvin schwartz"
+  favorite_book="scary stories to tell in the dark - alvin schwartz",
+  last_words="w-w-what's that on your shoulder?"
 })
 
 tea_ghost=ghost:new({
   phrases={
-    {{"hello! would you like some tea?",
-  }}
+    {{
+     "hello! would you like some tea?",
+     "oh, hang a second. i haven't figured out how to pick up the kettle."
+  }},
+   {{
+    "don't worry about clyde. i'll go check up on him in a moment.",
+    "he's kind of a worry wart, but he'll be fine.",
+   }},
   },
   current_frames={242},
   x=36,
   y=32,
   name="alex",
+  favorite_book="everyone's a aliebn when ur a aliebn too - jomny sun",
+
 })
 
 erwin=ghost:new({
@@ -1076,7 +1123,7 @@ erwin=ghost:new({
     "well.",
     "i don't know what this afterlife thing has to offer,",
     "but you can bet i won't let the world pass me by a second time."
-  }}
+  }, function(self) self:vanish_to(fountain) end }
   },
   current_frames={198},
   x=46,
@@ -1090,7 +1137,8 @@ erwin=ghost:new({
 
 stargazer=ghost:new({
   phrases={
-    {{"i always wondered why ghosts were supposed to haunt places.",
+    {{
+"i always wondered why ghosts were supposed to haunt places.",
 "why stick around in some dusty old ruin?",
 "you don't get hungry, you don't get tired, you can't get hurt. and you can fly!",
 "go explore! there's a hundred billion lifetimes of things to see on this planet alone.",
@@ -1098,8 +1146,24 @@ stargazer=ghost:new({
 "gravity is nothing to a ghost.",
 "thousands of years of interstellar travel is nothing if you're immortal.",
 "just be patient, and one day you'll find another world to explore.",
+}, ghost.increment_phrase},
+{{
 ". . .",
-"i say that, and yet i'm stuck here."}},
+"i say that, but i've been stuck here. just sitting, watching the stars.",
+"like trying to convince myself to get out of bed.",
+"maybe that's what the deal with ghosts is. post-death depression.",
+"hey, thanks for coming to talk to me. i guess living people can fly now too, so that's cool.",
+"okay, i'm gonna do it. i'm gonna go.",
+"i'll sneak into a hollywood studio and watch them make a movie.",
+"and then i'm gonna go fly around with a bunch of starlings.",
+"and then i think i'm gonna figure out where the giant squids like to hang out.",
+"yeah. that sounds good."
+}, ghost.increment_phrase},
+{{
+ "okay! yes. off i go.",
+ "hey, when you die too, come find me.",
+ "i'll show you around ganymede or something. it'll be fun."
+}, function(self) self:vanish_to(fountain) end }
 },
 current_frames={193},
 spr_w=2,
@@ -1110,7 +1174,8 @@ x=22,
 y=28,
 name="stargazer",
 can_flip=false,
-favorite_book="diaspora - greg egan"
+favorite_book="diaspora - greg egan",
+last_words=""
 })
 
 librarian=ghost:new({
@@ -1130,7 +1195,6 @@ librarian=ghost:new({
       },
       function(self)
        has_book=true
-       self:add_entry()
        self:vanish_to(fountain)
       end
     },
@@ -1159,7 +1223,7 @@ mourner=ghost:new({
   "what kind of loser ghost haunts a graveyard by herself?",
   ". . .",
   "i just want my nanna back."
-}, function(self) self:add_entry() end}
+}, function(self) self:vanish_to(fountain) end}
   },
   current_frames={197},
   sx=64,
@@ -1190,7 +1254,7 @@ elder=ghost:new({
       "who just happened to sprout from a human long ago.",
       "what do all these years matter when they shrink into eternity?",
       "will i even remember what it was like to be alive?"
-    }}
+    }, function (self) self:vanish_to(fountain) end}
   },
   current_frames={227},
   x=45,
@@ -1219,7 +1283,7 @@ ant=ghost:new({
     "i think that i will never, ever know what it's like to be an ant.",
     "that whole slice of existence is closed off forever - ",
     "an infinity that will never intersect with my infinity."
-  }}
+  }, function(self) self:vanish_to(fountain) end}
   },
   current_frames={231},
   x=27,
@@ -1271,7 +1335,8 @@ statue=ghost:new({
     {{
       "look, living is an act of creation.",
       "you are born a block of fresh marble, and every day of your life you chisel away at it.",
-      "every chip is permanent. you're not gluing that thing back on.",
+      "every chip is permanent.",
+      "if you break off a chunk by accident, you're not gluing that thing back on.",
       "but you can always work with what you've got left.",
       "i tried really hard to make something good out of myself.",
       "i read my books, i painted in the morning, i did a lot of sit-ups, i told my friends i loved them.",
@@ -1286,9 +1351,9 @@ statue=ghost:new({
       "but you know what?",
       "screw it.",
       "we all deserve to be put on a pedestal.",
-      "appreciate what you've made of yourself. let yourself be remembered.",
+      "appreciate what you've made of yourself. let yourself be remembered, chips and cracks and all.",
       "even if you wanted to be so much more."
-    }}
+    }, function(self) self:vanish_to(fountain) end}
   },
   current_frames={93},
   x=46,
@@ -1299,6 +1364,36 @@ statue=ghost:new({
   name="rosetta",
   last_words="appreciate what you've made of yourself. let yourself be remembered.",
   favorite_book="the mezzanine - nicholson baker"
+})
+
+sleepy=ghost:new({
+ phrases={
+  {{
+   "i think i'm tired.",
+   "not body-tired, like after a long hike, but a heavy, cluttered, brain-tired.",
+   "do you know the feeling?",
+   "all the thoughts of the day piled on top of each other, dissolving into a buzzing mass.",
+   "i used to hear about heaven and think, \"wouldn't that be exhausting?\"",
+   "infinite joy for all of eternity, like a never-ending song.",
+   "i was terrified of the thought.",
+   "even when i'm having a good time, partying or reading comics or birdwatching,",
+   "i can feel this static building up inside of me.",
+   "nothing but sleep will let it settle.",
+   "after a good night, all that static is wiped away, and i feel like a new person.",
+   "i think i can do this afterlife thing, and i think i'll enjoy it,",
+   "but only if every now and then i get to sleep for a hundred years or so.",
+   "just give me some time.",
+   "i have a lot of thoughts i need to wash away.",
+  }}
+ },
+ current_frames={225},
+ x=36,
+ y=32,
+ spr_w=2,
+ spr_h=1,
+ facing_left=true,
+ favorite_book="order of tales - evan dahm",
+ name="neil"
 })
 
 ghosts={
@@ -1442,6 +1537,7 @@ blueberry_lane_1=room:new({tile_sx=30,tile_sy=16,tile_w=9,tile_h=6,})
 blueberry_lane_2=room:new({tile_sx=39,tile_sy=16,tile_w=9,tile_h=6,})
 blueberry_lane_3=room:new({tile_sx=30,tile_sy=22,tile_w=9,tile_h=6,})
 blueberry_lane_4=room:new({tile_sx=39,tile_sy=22,tile_w=9,tile_h=6,})
+
 
 rosemary_way_1=room:new({tile_sx=31,tile_sy=16,tile_w=9,tile_h=6,})
 rosemary_way_2=room:new({tile_sx=30,tile_sy=22,tile_w=9,tile_h=6,})
@@ -1878,12 +1974,12 @@ bdd3bdd3000000000000000000000000000200000000200002002000000200200606660006066600
 06707070000000000600000000000677700000000070707007660000000000000000000000000000000000000000000000000777077700000000ddd670000000
 000777700000000000000000000000000000000000000000000000007777000000000000000000000000000000000000000007777700000000000dd700000000
 0077d7d0000000000000000000000000000000000000000000000000770070000000000000000000000000000000000000077777777700000000000700000000
-00777770077700000000000000000000000000000000000000000000000070000000000000000007000000000000000007777777777777000000000700000000
-07777000777760000000000000000000000000000066066000000000000007000000000000000077700000000000000067777777777777600000000000000000
-70700700777776776076600000000007777760000006060000000000000077700077770000000760700000000000000006777777777776000000000000000000
-70770700dd7dd77777777600000000777777760066677766600000000077dd700777777000077677767000000000000000067777777600000000000000000000
-706007007777777777777600000000d7d7777600067d7d7600000000077ddd700777777007776777767700000000000000000677760000000000000000000000
-70770700077700777077700000000077777777600077777000000000077777777777777007767777776770000000000000000077700000000000000000000000
+00777770000000000000777000000000000000000000000000000000000070000000000000000007000000000000000007777777777777000000000700000000
+07777000000000000006777700000000000000000066066000000000000007000000000000000077700000000000000067777777777777600000000000000000
+70700700000667067767777700000007777760000006060000000000000077700077770000000760700000000000000006777777777776000000000000000000
+7077070000677777777dd7dd000000777777760066677766600000000077dd700777777000077677767000000000000000067777777600000000000000000000
+706007000067777777777777000000d7d7777600067d7d7600000000077ddd700777777007776777767700000000000000000677760000000000000000000000
+70770700000777077700777000000077777777600077777000000000077777777777777007767777776770000000000000000077700000000000000000000000
 7070070000000000000000000000000777777760667ddd76600000006677770777777770777677777767700000000000000007777700000000000eeeeee00000
 00670000000000000000000000000000007777770667776600000000606777006677777777677777777670000000000000007077707000000000e555555e0000
 0777700000000000000000000000000077077707000070000000000006000000006666776677777777776600000000000000707770700000000eeddddddee000
@@ -1935,9 +2031,9 @@ __sfx__
 010600001875024750187502675018750287501875029750187502b750187502d750187502f750187503075000700007000070000700007000070000700007000070000700007000070000700007000070000700
 00060000187501c7501a7501d7501c7501f7501d750217501f7502375021750247502375026750247502875024750287502675029750287502b750297502d7502b7502f7502d750307502f750327503075034750
 0106000024750287502675029750287502b750297502d7502b7502f7502d750307502f75032750307503475000700007000070000700007000070000700007000070000700007000070000700007000070000700
-000a0000297202a7202f72030720007200172024720257203072033720187301a7300070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700
-010c000018720197201a7201b7501c7501d7501e7501f750207502175022750237502475024750007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700
+010c0000297202a7202f72030720007200172002720257203072033720187301a7301362016620136201062000700007000070000700007000070000700007000070000700007000070000700007000070000700
+010c000018520195201a5201b5501c5501d5501e5501f550205502155022550235502455025550265502755028550295502a5502b5502c5502d5502e5502f5503055031550325503355034550355503655037550
+011000002675024750187501f7502475026750287502675024750187501f7502475026750287502675024750187501f7502475026750287502675024750187501f75024750267502875026750247502875000000
 __music__
 00 05424344
 04 04424344
-

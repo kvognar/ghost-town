@@ -388,6 +388,15 @@ function player:collide_and_move()
     self.flying=false
     self.dy=0
   end
+
+  -- collide up
+  if self.flying and
+  	(is_solid(self.x,self.y+self.dy) or
+  	 is_solid(self.x+self.w,self.y+self.dy))
+  then
+  	 self.dy=0
+  end
+
   self.y+=self.dy
 
 end
@@ -1101,6 +1110,12 @@ tea_ghost=ghost:new({
    {{
     "don't worry about clyde. i'll go check up on him in a moment.",
     "he's kind of a worry wart, but he'll be fine.",
+    "if i'm honest, calming him down is the only thing keeping me steady.",
+    "life can be scary. death too, apparently.",
+    "but we've got each other, and we've always kept each other afloat",
+    "and i can't see anything stopping us from doing that just because we're dead.",
+    "i count myself lucky.",
+    "i can't think of anyone i'd rather spend eternity with."
    }},
   },
   current_frames={242},
@@ -1108,6 +1123,7 @@ tea_ghost=ghost:new({
   y=32,
   name="alex",
   favorite_book="everyone's a aliebn when ur a aliebn too - jomny sun",
+  last_words="i can't think of anyone i'd rather spend eternity with."
 
 })
 
@@ -1132,7 +1148,8 @@ erwin=ghost:new({
   spr_w=2,
   h=12,
   name="erwin",
-  favorite_book="sum: forty tales from the afterlives - david eagleman"
+  favorite_book="sum: forty tales from the afterlives - david eagleman",
+  last_words="what a weird unfairness of life that it should have too many good things."
 })
 
 stargazer=ghost:new({
@@ -1175,7 +1192,7 @@ y=28,
 name="stargazer",
 can_flip=false,
 favorite_book="diaspora - greg egan",
-last_words=""
+last_words="what do you think the cosmic microwave background tastes like?"
 })
 
 librarian=ghost:new({
@@ -1206,7 +1223,7 @@ librarian=ghost:new({
   y=48,
   name="library ann",
   favorite_book="kalpa imperial: the greatest empire that never was - angelica gorodischer",
-  last_words="they deserve to be remembered."
+  last_words="they deserve to be remembered. every one of them."
 })
 
 mourner=ghost:new({
@@ -1223,7 +1240,16 @@ mourner=ghost:new({
   "what kind of loser ghost haunts a graveyard by herself?",
   ". . .",
   "i just want my nanna back."
-}, function(self) self:vanish_to(fountain) end}
+} ghost.increment_phrase},
+{{"i think i hear voices in the distance.",
+"are there other ghosts out there?",
+"i'm not the only one?",
+"why them and not nan?",
+". . .",
+"i guess i'll go see what's going on.",
+"thanks for pulling me out of my funk."
+},
+ function(self) self:vanish_to(fountain) end}
   },
   current_frames={197},
   sx=64,
@@ -1262,6 +1288,8 @@ elder=ghost:new({
   spr_h=2,
   spr_w=2,
   name="muriel",
+  favorite_book="breakfast of champions - kurt vonnegut",
+  last_words="i'm starting to realize what \"strange eons\" might be."
 })
 
 ant=ghost:new({
@@ -1292,7 +1320,8 @@ ant=ghost:new({
   spr_w=5,
   name="mae",
   can_flip=false,
-  favorite_book="watership down - richard adams"
+  favorite_book="watership down - richard adams",
+  last_words="maybe when the universe is done, we can start over and i'll be a bee."
 })
 
 flower=ghost:new({
@@ -1327,7 +1356,8 @@ flower=ghost:new({
   name="chuck",
   can_flip=false,
   voice_start=4,
-  favorite_book="a heap o' livin' - edgar a. guest"
+  favorite_book="a heap o' livin' - edgar a. guest",
+  last_words="..."
 })
 
 statue=ghost:new({
@@ -1393,7 +1423,8 @@ sleepy=ghost:new({
  spr_h=1,
  facing_left=true,
  favorite_book="order of tales - evan dahm",
- name="neil"
+ name="neil",
+ last_words="dream quiet dreams. the world will be waiting for you when you wake."
 })
 
 ghosts={
@@ -1568,8 +1599,6 @@ end
 
 --add last-word hooks
 
---fix upward collision
-
 --move all ghosts to fountain
 --give ghosts goodbyes
 --script ghost's exit
@@ -1578,6 +1607,9 @@ end
 
 --add title screen
 --add voices maybe
+
+-- fix rosetta's starting position (and erwin's) (and muriel's)
+-- make erwin poof into a ghost cloud
 
 -->8
 --game state
@@ -1718,6 +1750,36 @@ function book:draw()
 		print("➡️", 114,116)
 	end
 end
+
+-- title screen
+
+title={}
+states.title=title
+
+function title:init()
+
+end
+
+function title:update()
+	t+=1
+	if btnp(b.z) then
+		fade_to(function ()
+			state=states.game
+		end)
+	end
+end
+
+function title:draw()
+	fountain:draw()
+	print("last words",
+		42,
+		26,
+		7)
+	print("press z to end",
+		32,
+		40
+	)
+end
 -->8
 --builtins
 
@@ -1726,7 +1788,7 @@ function _init()
  current_stage=schoolhouse_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
- state = states.game
+ state = states.title
  book.ghost_idx=1
 end
 

@@ -110,7 +110,6 @@ function stage:draw()
 end
 
 function stage:draw_sky()
-  if (t%100==0) sunset+=1
   local width=self.width-1
   rectfill(0,0,width,11+sunset/4,1)
   rectfill(0,12+sunset/4,width,23+sunset/3,2)
@@ -843,7 +842,9 @@ sugar_captain=ghost:new({
   voice_start=16,
   voice_length=3,
   favorite_book="red rackham's treasure - herge",
-  last_words="sugar gliders are basically vampires but for trees."
+  last_words="sugar gliders are basically vampires but for trees.",
+  fountain_x=110,
+  fountain_y=3
 })
 
 sugar_maestro=ghost:new({
@@ -867,7 +868,9 @@ sugar_maestro=ghost:new({
   voice_length=3,
   name="sugar maestro",
   favorite_book="the tea dragon society - kay o'neill",
-  last_words="when i'm bigger, i'll fly you around in my pocket."
+  last_words="when i'm bigger, i'll fly you around in my pocket.",
+  fountain_x=101,
+  fountain_y=12
 })
 
 function sugar_maestro:update()
@@ -958,7 +961,9 @@ sugar_magistrate=ghost:new({
  voice_length=3,
  sy_m=8,
  favorite_book="falling up - shel silverstein",
- last_words="see? you can do anything if you just believe you can."
+ last_words="see? you can do anything if you just believe you can.",
+ fountain_x=87,
+ fountain_y=3
 })
 
 sugar_crew={
@@ -1028,7 +1033,9 @@ end
   facing_left=true,
   name="mrs. lovegarden",
   favorite_book="piranesi - susanna clarke",
-  last_words="perk up those ears. there's something new for us to learn today."
+  last_words="perk up those ears. there's something new for us to learn today.",
+  fountain_x=26,
+  fountain_y=63
 })
 
 scientist=ghost:new({
@@ -1064,7 +1071,9 @@ end
   voice_length=4,
   can_flip=false,
   favorite_book="the dragons of eden - carl sagan",
-  last_words="i suppose i will have the rest of eternity to learn what ghosts are."
+  last_words="i suppose i will have the rest of eternity to learn what ghosts are.",
+  fountain_x=8,
+  fountain_y=37
 })
 
 function scientist:draw()
@@ -1098,7 +1107,9 @@ scaredy_ghost=ghost:new({
   y=32,
   name="clyde",
   favorite_book="scary stories to tell in the dark - alvin schwartz",
-  last_words="w-w-what's that on your shoulder?"
+  last_words="w-w-what's that on your shoulder?",
+  fountain_x=66,
+  fountain_y=70
 })
 
 tea_ghost=ghost:new({
@@ -1123,8 +1134,9 @@ tea_ghost=ghost:new({
   y=32,
   name="alex",
   favorite_book="everyone's a aliebn when ur a aliebn too - jomny sun",
-  last_words="i can't think of anyone i'd rather spend eternity with."
-
+  last_words="i can't think of anyone i'd rather spend eternity with.",
+  fountain_x=47,
+  fountain_y=70
 })
 
 erwin=ghost:new({
@@ -1149,7 +1161,9 @@ erwin=ghost:new({
   h=12,
   name="erwin",
   favorite_book="sum: forty tales from the afterlives - david eagleman",
-  last_words="what a weird unfairness of life that it should have too many good things."
+  last_words="what a weird unfairness of life that it should have too many good things.",
+  fountain_x=8,
+  fountain_y=6
 })
 
 stargazer=ghost:new({
@@ -1192,7 +1206,9 @@ y=28,
 name="stargazer",
 can_flip=false,
 favorite_book="diaspora - greg egan",
-last_words="what do you think the cosmic microwave background tastes like?"
+last_words="what do you think the cosmic microwave background tastes like?",
+fountain_x=70,
+fountain_y=48
 })
 
 librarian=ghost:new({
@@ -1223,7 +1239,9 @@ librarian=ghost:new({
   y=48,
   name="library ann",
   favorite_book="kalpa imperial: the greatest empire that never was - angelica gorodischer",
-  last_words="they deserve to be remembered. every one of them."
+  last_words="they deserve to be remembered. every one of them.",
+  fountain_x=102,
+  fountain_y=31
 })
 
 mourner=ghost:new({
@@ -1256,8 +1274,11 @@ mourner=ghost:new({
   sy=60,
   name="kathlyn",
   offset=0,
-  favorite_book="all my puny sorrows - miriam toews"
+  favorite_book="all my puny sorrows - miriam toews",
+  fountain_x=31,
+  fountain_y=14
 })
+
 function mourner:update()
   local new_x=self.sx+30*sin(self.offset/300)
   self.facing_left=new_x<self.x
@@ -1289,7 +1310,9 @@ elder=ghost:new({
   spr_w=2,
   name="muriel",
   favorite_book="breakfast of champions - kurt vonnegut",
-  last_words="i'm starting to realize what \"strange eons\" might be."
+  last_words="i'm starting to realize what \"strange eons\" might be.",
+  fountain_x=2,
+  fountain_y=62
 })
 
 ant=ghost:new({
@@ -1321,7 +1344,10 @@ ant=ghost:new({
   name="mae",
   can_flip=false,
   favorite_book="watership down - richard adams",
-  last_words="maybe when the universe is done, we can start over and i'll be a bee."
+  last_words="maybe when the universe is done, we can start over and i'll be a bee.",
+  fountain_x=91,
+  fountain_y=64
+
 })
 
 flower=ghost:new({
@@ -1357,7 +1383,9 @@ flower=ghost:new({
   can_flip=false,
   voice_start=4,
   favorite_book="a heap o' livin' - edgar a. guest",
-  last_words="..."
+  last_words="...",
+  fountain_x=-50,
+  fountain_y=-50
 })
 
 statue=ghost:new({
@@ -1393,7 +1421,9 @@ statue=ghost:new({
   h=24,
   name="rosetta",
   last_words="appreciate what you've made of yourself. let yourself be remembered.",
-  favorite_book="the mezzanine - nicholson baker"
+  favorite_book="the mezzanine - nicholson baker",
+  fountain_x=60,
+  fountain_y=28
 })
 
 sleepy=ghost:new({
@@ -1424,7 +1454,9 @@ sleepy=ghost:new({
  facing_left=true,
  favorite_book="order of tales - evan dahm",
  name="neil",
- last_words="dream quiet dreams. the world will be waiting for you when you wake."
+ last_words="dream quiet dreams. the world will be waiting for you when you wake.",
+ fountain_x=-50,
+ fountain_y=-50
 })
 
 ghosts={
@@ -1438,6 +1470,7 @@ ghosts={
  erwin,
  tea_ghost,
  scaredy_ghost,
+ sleepy,
  scientist,
  teacher,
  sugar_maestro,
@@ -1751,6 +1784,52 @@ function book:draw()
 	end
 end
 
+-- debug for placing ghosts
+debug={}
+states.debug=debug
+
+function debug:update()
+ current_stage:update()
+ t+=1
+
+ if btn(b.left) then
+  debug.ghost.x-=1
+ elseif btn(b.right) then
+  debug.ghost.x+=1
+ elseif btn(b.up) then
+  debug.ghost.y-=1
+ elseif btn(b.down) then
+  debug.ghost.y+=1
+ end
+
+ if btnp(b.z) then
+  debug.ghost_idx-=1
+ elseif btnp(b.x) then
+  debug.ghost_idx+=1
+ end
+
+ debug.ghost_idx = mid(1, debug.ghost_idx, #ghosts)
+
+ debug.ghost=ghosts[debug.ghost_idx]
+end
+
+function debug:draw()
+ cls()
+ set_camera()
+ current_stage:draw()
+ foreach(current_stage.actors, function(actor)
+   actor:draw()
+   actor.x=actor.fountain_x
+   actor.y=actor.fountain_y
+ end)
+ print(debug.ghost.name, 5, 100)
+ print("x: "..debug.ghost.x)
+ print("y: "..debug.ghost.y)
+
+
+end
+
+
 -- title screen
 
 title={}
@@ -1788,8 +1867,14 @@ function _init()
  current_stage=schoolhouse_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
- state = states.title
+ -- state = states.title
  book.ghost_idx=1
+
+ current_stage=fountain
+ fountain.actors=ghosts
+ state=states.debug
+ debug.ghost_idx=1
+ debug.ghost=ghosts[1]
 end
 
 
@@ -1801,6 +1886,8 @@ end
 
 function _update()
 	timeout_update()
+ if (t%100==0) sunset+=1
+
 
  if fading then
    fade_update()

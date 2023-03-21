@@ -1240,7 +1240,7 @@ mourner=ghost:new({
   "what kind of loser ghost haunts a graveyard by herself?",
   ". . .",
   "i just want my nanna back."
-} ghost.increment_phrase},
+}, ghost.increment_phrase},
 {{"i think i hear voices in the distance.",
 "are there other ghosts out there?",
 "i'm not the only one?",
@@ -2099,3 +2099,4 @@ __sfx__
 __music__
 00 05424344
 04 04424344
+

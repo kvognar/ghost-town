@@ -2,6 +2,8 @@ pico-8 cartridge // http://www.pico-8.com
 version 36
 __lua__
 --setup
+--minify: /usr/local/bin/python3 shrinko8/shrinko8.py ghost-town/ghost_town.p8 ghost-town/ghost_town_minified.p8 --minify
+
 
 t=0
 sunset=0
@@ -353,7 +355,7 @@ function player:draw()
 
   if (t%20==0) self.icon_offset*=-1
   local other = colliding_actor()
-  if other and other.icon and not speaking then
+  if other and other.icon and not speaking and not other.blinking then
     spr(other.icon,self.x,self.y-(10+self.icon_offset))
   end
 end
@@ -517,6 +519,7 @@ ghost=entity:new({
 })
 
 function ghost:interact()
+ if (self.blinking) return
   dialog:init(self.phrases[self.phrase_index][1],
   self,
   self.phrases[self.phrase_index][2])
@@ -544,7 +547,6 @@ function ghost:update()
   end
   if self.target_point then
    self:aim_for(self.target_point)
-
   end
   entity.update(self)
 end
@@ -553,16 +555,28 @@ function ghost:increment_phrase()
   self.phrase_index+=1
 end
 
-function ghost:vanish_to(stage)
+function ghost:vanish()
  self:add_entry()
   self:blink(function(self)
+   self.x=self.fountain_x
+   self.y=self.fountain_y
     del(current_stage.actors,self)
     -- add(stage.actors,self)
   end)
 end
 
+function ghost:stop()
+ self.finished=true
+ self.interactable=false
+end
+
 function ghost:add_entry()
 	self.finished=true
+ for ghost in all(ghosts)  do
+  -- if (not ghost.finished) return
+ end
+ fountain.actors=fountain_ghosts
+
 end
 
 function ghost:blink(callback)
@@ -572,11 +586,12 @@ function ghost:blink(callback)
 end
 
 function ghost:draw()
-  if (not state==states.book)
+  if (not (state==states.book))
   and (self.blinking and t%2==0)
   then
    return
   end
+
   entity.draw(self)
   if (self.target_point) then
    circfill(self.target_point.x,self.target_point.y,4,0)
@@ -816,8 +831,6 @@ function wipe:draw()
 	end
 end
 
-
--- "good morning. the day is still young yet, and there are adventures to be had.",
 -->8
 -- characters
 
@@ -1018,9 +1031,7 @@ teacher=ghost:new({
  "now we're dead, and it looks like lessons are over.",
  "but this afterlife business is a new experience. whatever comes next, we'll all be learning together.",
  "my students will be brilliant ghosts, i'm sure of it."
-}, function(self)
- self:vanish_to(fountain)
-end
+}, ghost.vanish
 }
 
 },
@@ -1052,10 +1063,7 @@ scientist=ghost:new({
  "the mechanics of your body are a symphony - one that i used to play in as well.",
  "what a shame that, now that i can see how our bodies worked, it no longer means anything to me.",
  "i suppose i will have the rest of eternity to learn what ghosts are."
-}, function(self)
- self:vanish_to(fountain)
-end
-}
+}, ghost.vanish}
 },
   x=30,
   y=24,
@@ -1096,9 +1104,8 @@ scaredy_ghost=ghost:new({
      {"th... there are ghosts all over this town! don't you see them?",
     "run! run for your life!"},
     function(self)
-     self:vanish_to(fountain)
+     self:vanish()
      tea_ghost.phrase_index=2
-
     end
  }
   },
@@ -1123,11 +1130,11 @@ tea_ghost=ghost:new({
     "he's kind of a worry wart, but he'll be fine.",
     "if i'm honest, calming him down is the only thing keeping me steady.",
     "life can be scary. death too, apparently.",
-    "but we've got each other, and we've always kept each other afloat",
+    "but we've got each other, and we've always kept each other afloat,",
     "and i can't see anything stopping us from doing that just because we're dead.",
     "i count myself lucky.",
     "i can't think of anyone i'd rather spend eternity with."
-   }},
+   }, ghost.vanish},
   },
   current_frames={242},
   x=36,
@@ -1151,7 +1158,7 @@ erwin=ghost:new({
     "well.",
     "i don't know what this afterlife thing has to offer,",
     "but you can bet i won't let the world pass me by a second time."
-  }, function(self) self:vanish_to(fountain) end }
+  }, ghost.vanish}
   },
   current_frames={198},
   x=46,
@@ -1194,7 +1201,7 @@ stargazer=ghost:new({
  "okay! yes. off i go.",
  "hey, when you die too, come find me.",
  "i'll show you around ganymede or something. it'll be fun."
-}, function(self) self:vanish_to(fountain) end }
+}, ghost.vanish }
 },
 current_frames={193},
 spr_w=2,
@@ -1228,7 +1235,7 @@ librarian=ghost:new({
       },
       function(self)
        has_book=true
-       self:vanish_to(fountain)
+       self:vanish()
       end
     },
   },
@@ -1267,7 +1274,7 @@ mourner=ghost:new({
 "i guess i'll go see what's going on.",
 "thanks for pulling me out of my funk."
 },
- function(self) self:vanish_to(fountain) end}
+ ghost.vanish}
   },
   current_frames={197},
   sx=64,
@@ -1301,7 +1308,7 @@ elder=ghost:new({
       "who just happened to sprout from a human long ago.",
       "what do all these years matter when they shrink into eternity?",
       "will i even remember what it was like to be alive?"
-    }, function (self) self:vanish_to(fountain) end}
+    }, ghost.vanish}
   },
   current_frames={227},
   x=45,
@@ -1334,7 +1341,7 @@ ant=ghost:new({
     "i think that i will never, ever know what it's like to be an ant.",
     "that whole slice of existence is closed off forever - ",
     "an infinity that will never intersect with my infinity."
-  }, function(self) self:vanish_to(fountain) end}
+  }, ghost.vanish}
   },
   current_frames={231},
   x=27,
@@ -1368,9 +1375,7 @@ flower=ghost:new({
       "and just",
       "be."
     },
-    	function(self)
-    		self.interactable=false
-    	end
+    	ghost.stop
     }
   },
   current_frames={206},
@@ -1411,7 +1416,7 @@ statue=ghost:new({
       "we all deserve to be put on a pedestal.",
       "appreciate what you've made of yourself. let yourself be remembered, chips and cracks and all.",
       "even if you wanted to be so much more."
-    }, function(self) self:vanish_to(fountain) end}
+    }, ghost.vanish}
   },
   current_frames={93},
   x=46,
@@ -1423,7 +1428,7 @@ statue=ghost:new({
   last_words="appreciate what you've made of yourself. let yourself be remembered.",
   favorite_book="the mezzanine - nicholson baker",
   fountain_x=60,
-  fountain_y=28
+  fountain_y=28,
 })
 
 sleepy=ghost:new({
@@ -1444,19 +1449,22 @@ sleepy=ghost:new({
    "but only if every now and then i get to sleep for a hundred years or so.",
    "just give me some time.",
    "i have a lot of thoughts i need to wash away.",
-  }}
+  },
+  ghost.stop
+}
  },
  current_frames={225},
- x=36,
- y=32,
+ x=46,
+ y=27,
  spr_w=2,
  spr_h=1,
- facing_left=true,
+ facing_left=false,
  favorite_book="order of tales - evan dahm",
  name="neil",
  last_words="dream quiet dreams. the world will be waiting for you when you wake.",
  fountain_x=-50,
- fountain_y=-50
+ fountain_y=-50,
+ can_flip=false
 })
 
 ghosts={
@@ -1477,6 +1485,23 @@ ghosts={
  sugar_captain,
  sugar_magistrate
  -- last ghost
+}
+
+fountain_ghosts={
+ librarian,
+ mourner,
+ elder,
+ ant,
+ statue,
+ stargazer,
+ erwin,
+ tea_ghost,
+ scaredy_ghost,
+ scientist,
+ teacher,
+ sugar_maestro,
+ sugar_captain,
+ sugar_magistrate
 }
 
 
@@ -1635,13 +1660,12 @@ end
 --move all ghosts to fountain
 --give ghosts goodbyes
 --script ghost's exit
+--fix dr. vera's floating eyeball
 
 --figure out an intro!
 
---add title screen
 --add voices maybe
 
--- fix rosetta's starting position (and erwin's) (and muriel's)
 -- make erwin poof into a ghost cloud
 
 -->8
@@ -1864,17 +1888,18 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=schoolhouse_entrance
+ current_stage=blueberry_lane_4
  initialize_actors()
  pl = player:new({x=30,y=20})
- -- state = states.title
+ state = states.title
  book.ghost_idx=1
 
- current_stage=fountain
- fountain.actors=ghosts
- state=states.debug
- debug.ghost_idx=1
- debug.ghost=ghosts[1]
+has_book=true
+ -- current_stage=fountain
+ -- fountain.actors=ghosts
+ -- state=states.debug
+ -- debug.ghost_idx=1
+ -- debug.ghost=ghosts[1]
 end
 
 
@@ -2166,8 +2191,8 @@ __map__
 00000000000000001e0f77770f0f777700000000000000000000009d9fa4a0a1a1a1a1a1a1a1a2a0a1a1a1a1a1a1a1a200ba000000bc9dae9e9e9e9e9fa4a0a1a1a1a1a1a1a1a2a0a1a1a1a1a1a1a1a20000000000000000213d3a223d3a2e000026272727273418a38f8f0088880000000000bc88a418000000000000000000
 0000000000001e771d1a1a1a1a1a781a0000000000bdbebebf0000adafa4a300000000000000a4a300000000000000a40000bdbebfbcad9eaeae9eaeafa4a300000000000000a4a300000000000000a4000000000000000068201f22201f6500000021201f2e0018a39d9fdedf000087880000bc00a418000000000000000000
 770f0f7777771d591a1a1a1a78785978b0b0b0b0b0b0b0b0b0b0b0b0b0b00000b7000000b700a4000000b700919293a4b0b0b0b0b0b0b0b0b0b0b0b0b0b00000b7000000b700a40000b6000000b600a4000000000000000721302f22302f2e07070b21302f650718a3ad9feeef668b8c8e8a88bc00a418000000000000000000
-78781a1a1a78591a1a1a781a591a787800000000000000000000000000000000009192930000a400b2b30000000000a400000000000000000000000000000000009a00b80000a400009192930000b3a4000000000000003f353839363839373f3f6b353839376b18a3adaffeff769b9c8d8900bc00a418000000000000000000
-0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0000000000000000000000000000000000a5a9a70000a40000949500a5a9a7a40000000000000000000000000000000082aa8200b4b5a40000a5a6a700b4b5a4000000000000000606060606060606060606060606060618b1b1b1b1b1b1b1b1b1b1b1b1b1b118000000000000000000
+78781a1a1a78591a1a1a781a591a787800000000000000000000000000000000009192930000a40000b2b300000000a400000000000000000000000000000000009a00b80000a400009192930000b3a4000000000000003f353839363839373f3f6b353839376b18a3adaffeff769b9c8d8900bc00a418000000000000000000
+0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0000000000000000000000000000000000a5a9a70000a4000094950000b4b5a40000000000000000000000000000000082aa8200b4b5a40000a5a6a700b4b5a4000000000000000606060606060606060606060606060618b1b1b1b1b1b1b1b1b1b1b1b1b1b118000000000000000000
 7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b000000a0a1a1a1a1a1a1a2000000b1b1b1b1b1b1b1b1b1b0b0b0b0b0b0b0b0b00000000000000000000000000000b1b1b1b1b1b1b1b1b1b0b0b0b0b0b0b0b0b0000000000000007b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b18181818181818181818181818181818000000000000000000
 17171717171717171717171717171717000000a3000000000000a40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001717171717171717171717171717171718181818181818181818181818181818000000000000000000
 17171717171717171717171717171717000000a3000000000000a40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001717171717171717171717171717171718181818181818181818181818181818000000000000000000
@@ -2186,4 +2211,3 @@ __sfx__
 __music__
 00 05424344
 04 04424344
-

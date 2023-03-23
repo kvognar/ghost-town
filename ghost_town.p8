@@ -558,24 +558,28 @@ end
 function ghost:vanish()
  self:add_entry()
   self:blink(function(self)
+   del(current_stage.actors,self)
    self.x=self.fountain_x
    self.y=self.fountain_y
-    del(current_stage.actors,self)
-    -- add(stage.actors,self)
   end)
 end
 
 function ghost:stop()
- self.finished=true
  self.interactable=false
+ self:add_entry()
 end
 
 function ghost:add_entry()
 	self.finished=true
  for ghost in all(ghosts)  do
-  -- if (not ghost.finished) return
+  if (not ghost.finished) return
  end
  fountain.actors=fountain_ghosts
+ for ghost in all(fountain_ghosts) do
+  ghost.phrase_index=#ghost.phrases
+  ghost.x=ghost.fountain_x
+  ghost.y=ghost.fountain_y
+ end
 
 end
 
@@ -844,7 +848,10 @@ sugar_captain=ghost:new({
       'the sugar was inside you all along!'
      },
      function() sugar_maestro:interact() end
-    }
+    },
+    {{
+     "i'ma go drink a whole eucalyptus tree now i can fly to australia."
+    }}
   },
   current_frames={78},
   x=100,
@@ -871,7 +878,11 @@ sugar_maestro=ghost:new({
      sugar_magistrate:increment_phrase()
      sugar_magistrate:interact()
     end
-  }
+  },
+  {{
+   "mrs. lovegarden tells really good ghost stories.",
+   "that's how we got so good at the ghost stuff."
+  }}
   },
   current_frames={77},
   x=10,
@@ -957,7 +968,10 @@ sugar_magistrate=ghost:new({
     'okay bye!'
    },
    exit_sugar_crew
-  }
+  },
+  {{
+   "darn it, i still can't grow a big ol eyeball like mamma did."
+  }}
  },
 
 
@@ -1032,7 +1046,12 @@ teacher=ghost:new({
  "but this afterlife business is a new experience. whatever comes next, we'll all be learning together.",
  "my students will be brilliant ghosts, i'm sure of it."
 }, ghost.vanish
-}
+},
+
+{{
+ "the kids are going to give me flying lessons tomorrow.",
+ "i wonder if ann will want to come along, too."
+}}
 
 },
   current_frames={195},
@@ -1063,7 +1082,13 @@ scientist=ghost:new({
  "the mechanics of your body are a symphony - one that i used to play in as well.",
  "what a shame that, now that i can see how our bodies worked, it no longer means anything to me.",
  "i suppose i will have the rest of eternity to learn what ghosts are."
-}, ghost.vanish}
+}, ghost.vanish},
+
+{{
+ "this might all be my doing.",
+ "don't let the others know.",
+ "they seem happy enough as it is, and i don't think i could ever explain it to them."
+}}
 },
   x=30,
   y=24,
@@ -1107,7 +1132,10 @@ scaredy_ghost=ghost:new({
      self:vanish()
      tea_ghost.phrase_index=2
     end
- }
+ },
+ {{
+  "...look! after all this, now we've got skeletons rising up!?"
+ }}
   },
   current_frames={241},
   x=54,
@@ -1135,6 +1163,10 @@ tea_ghost=ghost:new({
     "i count myself lucky.",
     "i can't think of anyone i'd rather spend eternity with."
    }, ghost.vanish},
+   {{
+    "oh, that's just a halloween decoration.",
+    "someone must have forgotten to pack mr. skellington up after the fair."
+   }}
   },
   current_frames={242},
   x=36,
@@ -1158,7 +1190,12 @@ erwin=ghost:new({
     "well.",
     "i don't know what this afterlife thing has to offer,",
     "but you can bet i won't let the world pass me by a second time."
-  }, ghost.vanish}
+  }, ghost.vanish},
+   {{
+    "i'm going to help kat look for her great aunt.",
+    "she was a pretty tough old lady.",
+    "i bet she's out in the woods wrestling ghost deer or something."
+   }}
   },
   current_frames={198},
   x=46,
@@ -1201,7 +1238,11 @@ stargazer=ghost:new({
  "okay! yes. off i go.",
  "hey, when you die too, come find me.",
  "i'll show you around ganymede or something. it'll be fun."
-}, ghost.vanish }
+}, ghost.vanish },
+{{
+ "how many ghosts do you think are up there, wandering around the stars?",
+  "maybe i'll meet my soulmate in the next galaxy over, huh? you never know."
+}}
 },
 current_frames={193},
 spr_w=2,
@@ -1238,6 +1279,12 @@ librarian=ghost:new({
        self:vanish()
       end
     },
+    {{
+     "thank you so much for helping everyone out.",
+     "i thought we were finished, but it sounds like we're just getting started.",
+     "i'm glad you were able to take down everyone's last words, but...",
+     "more than that, i think just lending a friendly ear gave them all the push they needed."
+    }}
   },
   current_frames={192},
   spr_h=2,
@@ -1274,7 +1321,14 @@ mourner=ghost:new({
 "i guess i'll go see what's going on.",
 "thanks for pulling me out of my funk."
 },
- ghost.vanish}
+ ghost.vanish},
+ {{
+  "erwin offered to help me find nan.",
+  "it's a big old world out there so I dunno if our odds are any good,",
+  "but it's nice to know i won't be alone in it.",
+  "i think i was this close to being a mopey graveyard ghost forever.",
+  "no wonder they're all so creepy in the stories, huh?"
+ }}
   },
   current_frames={197},
   sx=64,
@@ -1283,15 +1337,18 @@ mourner=ghost:new({
   offset=0,
   favorite_book="all my puny sorrows - miriam toews",
   fountain_x=31,
-  fountain_y=14
+  fountain_y=14,
 })
 
 function mourner:update()
+ if not speaking then
   local new_x=self.sx+30*sin(self.offset/300)
   self.facing_left=new_x<self.x
   self.x=new_x
   self.y=self.sy+10*sin(self.offset/500)
   self.offset+=1
+ end
+ ghost.update(self)
 end
 elder=ghost:new({
   phrases={
@@ -1308,7 +1365,14 @@ elder=ghost:new({
       "who just happened to sprout from a human long ago.",
       "what do all these years matter when they shrink into eternity?",
       "will i even remember what it was like to be alive?"
-    }, ghost.vanish}
+    }, ghost.vanish},
+    {{
+     "everyone seems to be getting along just fine.",
+     "i shouldn't be such a stick in the mud, should i?",
+     "right now we are us, and we are free,",
+     "and i get to spend more time with my daughter.",
+     "imagine complaining about that!"
+    }}
   },
   current_frames={227},
   x=45,
@@ -1341,7 +1405,11 @@ ant=ghost:new({
     "i think that i will never, ever know what it's like to be an ant.",
     "that whole slice of existence is closed off forever - ",
     "an infinity that will never intersect with my infinity."
-  }, ghost.vanish}
+  }, ghost.vanish},
+  {{
+   "watch your step, darlin'.",
+   "you never know who's underfoot."
+  }}
   },
   current_frames={231},
   x=27,
@@ -1416,7 +1484,11 @@ statue=ghost:new({
       "we all deserve to be put on a pedestal.",
       "appreciate what you've made of yourself. let yourself be remembered, chips and cracks and all.",
       "even if you wanted to be so much more."
-    }, ghost.vanish}
+    }, ghost.vanish},
+    {{
+     "no, no, i won't stay up here forever.",
+     "just give me a moment, will you? it's fun to pretend a while."
+    }}
   },
   current_frames={93},
   x=46,
@@ -1661,6 +1733,7 @@ end
 --give ghosts goodbyes
 --script ghost's exit
 --fix dr. vera's floating eyeball
+-- fix rosetta and muriel's facing positions
 
 --figure out an intro!
 
@@ -1853,6 +1926,14 @@ function debug:draw()
 
 end
 
+function jump_to_end()
+ for ghost in all(ghosts) do
+  ghost:add_entry()
+ end
+end
+
+menuitem(1, 'jump to end', jump_to_end)
+
 
 -- title screen
 
@@ -1888,13 +1969,15 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=blueberry_lane_4
+ current_stage=rosemary_way
  initialize_actors()
  pl = player:new({x=30,y=20})
  state = states.title
  book.ghost_idx=1
 
+-- debug stuff
 has_book=true
+pl.can_fly=true
  -- current_stage=fountain
  -- fountain.actors=ghosts
  -- state=states.debug

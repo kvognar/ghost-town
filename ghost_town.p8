@@ -575,14 +575,24 @@ function ghost:add_entry()
  for ghost in all(ghosts)  do
   if (not ghost.finished) return
  end
- fountain.actors=fountain_ghosts
- endgame=true
- for ghost in all(fountain_ghosts) do
-  ghost.phrase_index=#ghost.phrases
-  ghost.x=ghost.fountain_x
-  ghost.y=ghost.fountain_y
- end
- dialog:init(nobody.phrases[1][1], nobody)
+ set_timeout(60, function()
+  fountain.actors=fountain_ghosts
+  endgame=true
+  for ghost in all(fountain_ghosts) do
+   ghost.phrase_index=#ghost.phrases
+   ghost.x=ghost.fountain_x
+   ghost.y=ghost.fountain_y
+   ghost.ax=0
+   ghost.dx=0
+   ghost.ay=0
+   ghost.dy=0
+   ghost.target_point=nil
+  end
+  sugar_magistrate.sy=40
+  sugar_magistrate.drift=true
+  dialog:init(nobody.phrases[1][1], nobody)
+ end)
+
 end
 
 function ghost:blink(callback)
@@ -927,7 +937,7 @@ function exit_sugar_crew()
   crewmate:add_entry()
   sfx(3)
  end)
- set_timeout(90,function()
+ set_timeout(45,function()
  	current_stage:exit_down()
  	pl.sugars={
  		pl.sugars[1],
@@ -1997,14 +2007,21 @@ function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
  current_stage=library_entrance
  initialize_actors()
- pl = player:new({x=30,y=20})
+ pl = player:new({x=30,y=66})
  state = states.title
  book.ghost_idx=1
 
 -- debug stuff
 -- has_book=true
--- pl.can_fly=true
---  current_stage=fountain
+--  pl.can_fly=true
+--  current_stage=rosemary_way
+-- for ghost in all(ghosts) do
+--  if not (ghost==stargazer) then
+--   ghost:add_entry()
+--  end
+-- end
+
+ -- sugar_magistrate.sy=60
  -- fountain.actors=ghosts
  -- state=states.debug
  -- debug.ghost_idx=1
@@ -2080,6 +2097,13 @@ function sugar:update()
   self.dx+=xwiggle
   self.dy+=ywiggle
   end
+
+if not (self.moon==pl) then
+ -- sugars will slowly sink toward the ground,
+ -- just in case
+ if (t%150==0) self.moon.y=min(self.moon.y+1, 70)
+end
+
  else
    self.dy+=self.gravity
  end

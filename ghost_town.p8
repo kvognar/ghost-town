@@ -9,6 +9,7 @@ t=0
 sunset=0
 speaking=false
 has_book=false
+endgame=false
 
 timeout=0
 timeout_fn=nil
@@ -478,14 +479,14 @@ function player:check_boundaries()
 
  if self.x+self.dx+self.w/2 > current_stage.width then
  	if current_stage.right
-  and not sugar_mode then
+  and not sugar_mode and has_book then
    current_stage:exit_right()
   else
    self.dx=0
   end
  elseif self.x+self.dx < -5 then
   if current_stage.left
-  and not sugar_mode then
+  and not sugar_mode and has_book then
    current_stage:exit_left()
   else
    self.dx=0
@@ -512,9 +513,9 @@ ghost=entity:new({
   can_flip=true,
   interactable=true,
   favorite_book="readme.txt",
-  voice_clip=6,
-  voice_start=0,
-  voice_length=3,
+  voice_clip=7,
+  voice_start=6,
+  voice_length=9,
   last_words="good night, good luck, please remember that ☉ will see you on the morrow."
 })
 
@@ -575,12 +576,13 @@ function ghost:add_entry()
   if (not ghost.finished) return
  end
  fountain.actors=fountain_ghosts
+ endgame=true
  for ghost in all(fountain_ghosts) do
   ghost.phrase_index=#ghost.phrases
   ghost.x=ghost.fountain_x
   ghost.y=ghost.fountain_y
  end
-
+ dialog:init(nobody.phrases[1][1], nobody)
 end
 
 function ghost:blink(callback)
@@ -724,9 +726,9 @@ function initialize_actors()
   }
   rosemary_way.actors={
     stargazer,
-    door:new({x=99, y=62, w=10, h=16, room=rosemary_way_2}),
-    door:new({x=155, y=62, w=10, h=16, room=rosemary_way_3}),
-    door:new({x=236, y=62, w=10, h=16, room=rosemary_way_4}),
+    door:new({x=99, y=62, w=10, h=16, room=rosemary_way_4}),
+    door:new({x=155, y=62, w=10, h=16, room=rosemary_way_2}),
+    door:new({x=236, y=62, w=10, h=16, room=rosemary_way_3}),
   }
   rosemary_way_2.actors={
     ant,
@@ -1276,6 +1278,7 @@ librarian=ghost:new({
   phrases={
     {
       {
+        "oh, a living person!",
         "hello! would you like to borrow a book?",
         "...honestly, you can keep whatever you like here. the rest of us are over and done.",
         "but, if you do, can you do me a favor, please?",
@@ -1337,7 +1340,7 @@ mourner=ghost:new({
  ghost.vanish},
  {{
   "erwin offered to help me find nan.",
-  "it's a big old world out there so I dunno if our odds are any good,",
+  "it's a big old world out there so i dunno if our odds are any good,",
   "but it's nice to know i won't be alone in it.",
   "i think i was this close to being a mopey graveyard ghost forever.",
   "no wonder they're all so creepy in the stories, huh?"
@@ -1345,16 +1348,17 @@ mourner=ghost:new({
   },
   current_frames={197},
   sx=64,
-  sy=60,
+  sy=30,
   name="kathlyn",
   offset=0,
   favorite_book="all my puny sorrows - miriam toews",
+  last_words="don't put down any last words for me, ok? i'm not ready to deal with that.",
   fountain_x=31,
   fountain_y=14,
 })
 
 function mourner:update()
- if not speaking then
+ if not speaking and not endgame then
   local new_x=self.sx+30*sin(self.offset/300)
   self.facing_left=new_x<self.x
   self.x=new_x
@@ -1743,8 +1747,6 @@ end
 --todo
 
 --figure out an intro!
---add a "thank you for playing"
---add some kind of message when everyone is ready
 
 --add voices maybe
 
@@ -1778,6 +1780,7 @@ function states.game:update()
  t+=1
 end
 
+color_idx=1
 function states.game:draw()
  cls()
  set_camera()
@@ -1791,6 +1794,15 @@ function states.game:draw()
  foreach(pl.sugars, sugar.draw)
 
  dialog:draw()
+
+ if endgame and current_stage==fountain and not speaking then
+  local str="thank you for playing"
+  local colors={7,6,5,1,5,6}
+  if t%16==0 then
+   color_idx=(color_idx%#colors)+1
+  end
+  print(str, 64-(#str*2),109, colors[color_idx])
+ end
 end
 -->8
 --book state
@@ -1943,9 +1955,10 @@ function jump_to_end()
  for ghost in all(ghosts) do
   ghost:add_entry()
  end
+ dialog:init(nobody.phrases[1][1], nobody)
 end
 
-menuitem(1, 'jump to end', jump_to_end)
+-- menuitem(1, 'jump to end', jump_to_end)
 
 
 -- title screen
@@ -1982,16 +1995,16 @@ end
 
 function _init()
  dialog.message=dialog.phrases[dialog.phrase_index]
- current_stage=fountain
+ current_stage=library_entrance
  initialize_actors()
  pl = player:new({x=30,y=20})
  state = states.title
  book.ghost_idx=1
 
 -- debug stuff
-has_book=true
-pl.can_fly=true
- current_stage=fountain
+-- has_book=true
+-- pl.can_fly=true
+--  current_stage=fountain
  -- fountain.actors=ghosts
  -- state=states.debug
  -- debug.ghost_idx=1
@@ -2130,15 +2143,26 @@ function center_sugars()
 		sugar.y=pl.y
  end)
 end
+
+--hax for an end-game message
+nobody=ghost:new({phrases={
+ {{
+  "you hear voices coming from the fountain..."
+ }},
+},
+phrase_index=1,
+name='in the distance'
+})
+
 __gfx__
 00eeee00000000000000000000eeee000000000000eeee00333333330000b00000000000000000000000000000000000333f3f3fffffffff0000000000000000
-0eeee4e00eeee00000eeee000eeee4e0e0eeee000eeeeee03333333300b0b0b000000000000000000000000000000000f3f333f3ffffffff0000000000000000
-0e4b4be0eeee4e000eeee4e00e4b4be0eeeee4e00eeeeee45335533303b3b3b00000000000000000000000000000000053355f3f9ff99fff0000000000000000
-0e4444e0e4b4be000e4b4be04e4444e4ee4b4be00eeeeee425524535b3bbb3b30000000000000000000000000300303025524539299249f90f00f0f00f00f0f0
-eee44ee0e4444e000e4444e04ee44ee44e4444e40eeeeeee42242452333333330000000000000000000000003333333342242492422424923f3f3fffffffffff
-ee6aa6e0ee44ee0eeee44ee0e46aa6404ee44ee44eeeeeee44444224333333330008080000007000000a5a00333333334444422444444224f3f3ff3fffffffff
-04aaaa40e6aa6e0eee6aa6e000aaaa00046aa64004aeee00444444443333333300088800000777000005a5003333333344444444444444443fff3fffffffffff
-04aaaa404aaaa40404aaaa4000aaaa0000aaaa0000aaaa0044424442333333330000800000007000000a5a00333333334442444244424442f3f3f3f3ffffffff
+0eeee4e000eeee0000eeee000eeee4e0e0eeee000eeeeee03333333300b0b0b000000000000000000000000000000000f3f333f3ffffffff0000000000000000
+0e4b4be00eeee4e00eeee4e00e4b4be0eeeee4e00eeeeee45335533303b3b3b00000000000000000000000000000000053355f3f9ff99fff0000000000000000
+0e4444e00e4b4be00e4b4be04e4444e4ee4b4be00eeeeee425524535b3bbb3b30000000000000000000000000300303025524539299249f90f00f0f00f00f0f0
+eee44ee00e4444e00e4444e04ee44ee44e4444e40eeeeeee42242452333333330000000000000000000000003333333342242492422424923f3f3fffffffffff
+ee6aa6e0eee44ee0eee44ee0e46aa6404ee44ee44eeeeeee44444224333333330008080000007000000a5a00333333334444422444444224f3f3ff3fffffffff
+04aaaa40ee6aa6e0ee6aa6e000aaaa00046aa64004aeee00444444443333333300088800000777000005a5003333333344444444444444443fff3fffffffffff
+04aaaa4044aaaa4004aaaa4000aaaa0000aaaa0000aaaa0044424442333333330000800000007000000a5a00333333334442444244424442f3f3f3f3ffffffff
 00aaaa0000aaaa04004aaa0000aaaa0000aaaa0000aaaa004242424242424242424242423f3f3fffffffffff00000000f33333f300ffffff000000001288ac88
 00aaaa0000aaaa0000aaaa0000aaa40000aaa40004aaaa00242424242422242222222222f3f3ff3fffffffff000000003333333300ffffff000000001288ac88
 0040040000044000044004000040004000400040040004004242424242424242242424243fff3fffffffffff000000003333f33f0fffffff000000001222e222
@@ -2302,8 +2326,8 @@ __sfx__
 010600001875024750187502675018750287501875029750187502b750187502d750187502f750187503075000700007000070000700007000070000700007000070000700007000070000700007000070000700
 00060000187501c7501a7501d7501c7501f7501d750217501f7502375021750247502375026750247502875024750287502675029750287502b750297502d7502b7502f7502d750307502f750327503075034750
 0106000024750287502675029750287502b750297502d7502b7502f7502d750307502f75032750307503475000700007000070000700007000070000700007000070000700007000070000700007000070000700
-010c0000297202a7202f72030720007200172002720257203072033720187301a7301362016620136201062000700007000070000700007000070000700007000070000700007000070000700007000070000700
-010c000018520195201a5201b5501c5501d5501e5501f550205502155022550235502455025550265502755028550295502a5502b5502c5502d5502e5502f5503055031550325503355034550355503655037550
+010c0000291202a1202f12030120001200112002120251203012033120181301a1301312016120131201012000100001000010000100001000010000100001000010000100001000010000100001000010000100
+010c000018010190101a0101b0101c0101d0101e0101f010200102101022010230102401025010260102701028010290102a0102b0102c0102d0102e0102f0103001031010320103301034010350103601037010
 011000002675024750187501f7502475026750287502675024750187501f7502475026750287502675024750187501f7502475026750287502675024750187501f75024750267502875026750247502875000000
 __music__
 00 05424344

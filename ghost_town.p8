@@ -479,15 +479,25 @@ function player:check_boundaries()
 
  if self.x+self.dx+self.w/2 > current_stage.width then
  	if current_stage.right
-  and not sugar_mode and has_book then
-   current_stage:exit_right()
+  and not sugar_mode then
+   if has_book then
+    current_stage:exit_right()
+   else
+    self.dx=0
+    dialog:init(flora.phrases[1][1], flora)
+   end
   else
    self.dx=0
   end
  elseif self.x+self.dx < -5 then
   if current_stage.left
-  and not sugar_mode and has_book then
-   current_stage:exit_left()
+  and not sugar_mode then
+   if has_book then
+    current_stage:exit_left()
+   else
+    self.dx=0
+    dialog:init(flora.phrases[1][1], flora)
+   end
   else
    self.dx=0
   end
@@ -1292,13 +1302,13 @@ librarian=ghost:new({
         "hello! would you like to borrow a book?",
         "...honestly, you can keep whatever you like here. the rest of us are over and done.",
         "but, if you do, can you do me a favor, please?",
-        "the townfolk are good souls. i watched a lot of them grow up here.",
+        "the townsfolk are good souls. i watched a lot of them grow up here.",
         "i know their favorite books. i know what worried them, what excited them, what they looked forward to.",
         "you can tell a lot about a person by what they choose to read.",
         "it'll be time soon for us to move on, but before we all do...",
         "can you meet with the others and write down their last words for me?",
         "take the notebook with you when you're done, as a memento of what we used to be.",
-        "they deserve to be rememembered."
+        "they deserve to be remembered."
       },
       function(self)
        has_book=true
@@ -1501,7 +1511,7 @@ statue=ghost:new({
       "i read my books, i painted in the morning, i did a lot of sit-ups, i told my friends i loved them.",
       "i didn't delude myself. i knew i'd never be the sort of heroic statue that stands in town square.",
       "but i could be pretty good, you know? something nice to put out in the backyard by the lilies.",
-      "dying early was so frusting. just... look! i wasn't done yet! not even close!",
+      "dying early was so frustrating. just... look! i wasn't done yet! not even close!",
       "i was supposed to make a children's book.",
       "i was supposed to learn portuguese.",
       "i was supposed to be the kind of person who could take care of her parents.",
@@ -1567,6 +1577,17 @@ sleepy=ghost:new({
  fountain_y=-50,
  can_flip=false
 })
+
+function sleepy:draw()
+ ghost.draw(self)
+ if (not self.interactable) then
+  if (t%80 < 40) then
+   print('Z', self.x+10, self.y-5, 7)
+  else
+   print('z', self.x+14,self.y-7, 7)
+  end
+ end
+end
 
 ghosts={
  librarian,
@@ -1970,7 +1991,6 @@ end
 
 -- menuitem(1, 'jump to end', jump_to_end)
 
-
 -- title screen
 
 title={}
@@ -2012,9 +2032,9 @@ function _init()
  book.ghost_idx=1
 
 -- debug stuff
--- has_book=true
+ -- has_book=true
 --  pl.can_fly=true
---  current_stage=rosemary_way
+ -- current_stage=fountain
 -- for ghost in all(ghosts) do
 --  if not (ghost==stargazer) then
 --   ghost:add_entry()
@@ -2174,8 +2194,16 @@ nobody=ghost:new({phrases={
   "you hear voices coming from the fountain..."
  }},
 },
-phrase_index=1,
 name='in the distance'
+})
+
+flora=ghost:new({
+ phrases={
+  {{
+   "i think i'll check out the library before i move on."
+  }},
+ },
+ name="flora"
 })
 
 __gfx__
